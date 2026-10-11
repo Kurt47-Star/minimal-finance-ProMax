@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Plotly.js สำหรับกราฟ Treemap, Bar, Pie -->
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     body { font-family: 'Poppins', 'Prompt', sans-serif; background-color: #f8fafc; color: #1e293b; }
@@ -18,7 +17,7 @@
 </head>
 <body class="p-3 md:p-6 max-w-7xl mx-auto">
 
-  <!-- Header & Status -->
+  <!-- Header -->
   <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 border-b border-slate-200 pb-4">
     <div>
       <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Minimal Finance Pro</h1>
@@ -28,7 +27,7 @@
       <button onclick="fetchAllData()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1 transition-all">
         🔄 รีเฟรชข้อมูล
       </button>
-      <div id="loading-spinner" class="hidden text-xs text-[#f9744b] font-medium animate-pulse">กำลังประมวลผล...</div>
+      <div id="loading-spinner" class="hidden text-xs text-[#f9744b] font-medium animate-pulse">กำลังซิงค์...</div>
     </div>
   </div>
 
@@ -89,7 +88,7 @@
           </div>
           <div class="flex gap-4 text-xs font-medium">
             <label class="cursor-pointer"><input type="radio" name="sav_alloc_mode" value="single" checked onchange="toggleSavingsSplitMode()"> 🎯 เป้าหมายเดียว</label>
-            <label class="cursor-pointer"><input type="radio" name="sav_alloc_mode" value="split" onchange="toggleSavingsSplitMode()"> 🔀 แบ่งหลายเป้าหมาย (Split)</label>
+            <label class="cursor-pointer"><input type="radio" name="sav_alloc_mode" value="split" onchange="toggleSavingsSplitMode()"> 🔀 แบ่งหลายเป้าหมาย</label>
           </div>
           <div id="box-goal-single">
             <label class="block text-xs font-semibold text-slate-600 mb-1">เลือกเป้าหมาย</label>
@@ -151,7 +150,7 @@
     <details class="bg-white p-4 rounded-2xl border border-slate-200 text-sm">
       <summary class="font-semibold text-slate-700 cursor-pointer">⚖️ คาลิเบรทเงินจริงทุกกระเป๋า (Multi-Wallet Sync)</summary>
       <div class="mt-3 space-y-3">
-        <p class="text-xs text-slate-500">ใส่ยอดเงินจริงในบัญชีธนาคารปัจจุบัน ระบบจะทำรายการปรับยอดอัตโนมัติให้ตรงตามแอป:</p>
+        <p class="text-xs text-slate-500">ใส่ยอดเงินจริงในบัญชีปัจจุบัน ระบบจะปรับยอดอัตโนมัติให้ตรงเป๊ะ:</p>
         <div id="calibrate-inputs" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
         <button onclick="saveCalibration()" class="px-4 py-2 bg-[#f9744b] text-white text-xs font-semibold rounded-xl transition-all">⚡ ปรับยอดจริงทันที</button>
       </div>
@@ -161,7 +160,7 @@
       <div class="metric-card"><div class="text-xs text-slate-500">Net Wealth รวม</div><div class="text-xl font-bold" id="m-net">฿0</div></div>
       <div class="metric-card"><div class="text-xs text-slate-500">Income รอบนี้</div><div class="text-xl font-bold text-[#2a9d8f]" id="m-inc">฿0</div></div>
       <div class="metric-card"><div class="text-xs text-slate-500">Expenses รอบนี้</div><div class="text-xl font-bold text-[#f9744b]" id="m-exp">฿0</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-500">Savings สุทธิ</div><div class="text-xl font-bold text-[#457b9d]" id="m-sav">฿0</div><div class="text-[10px] text-amber-600" id="m-sav-loan"></div></div>
+      <div class="metric-card"><div class="text-xs text-slate-500">Savings สุทธิ</div><div class="text-xl font-bold text-[#457b9d]" id="m-sav">฿0</div></div>
       <div class="metric-card"><div class="text-xs text-slate-500">Investments</div><div class="text-xl font-bold text-[#e9c46a]" id="m-inv">฿0</div></div>
     </div>
 
@@ -331,22 +330,26 @@
 
   <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
-    // ⚙️ URL ของ Google Apps Script Web App
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzg31SHhb_lRbyAQvq-VshuCvBPbNGZopK3CMTf-SghbXwvW3eaAI9jUFByGI8lPgoYUA/exec;
+    // ⚙️ นำ Web App URL ของ Apps Script มาใส่ตรงนี้ครับ
+    const SCRIPT_URL = "YOUR_SCRIPT_URL_HERE"; 
 
-    let DB = {
-      transactions: [],
-      quickAdds: [],
-      categories: [],
-      loans: [],
-      cycles: [],
-      receivables: [],
-      goals: [],
-      wallets: [],
-      budgets: []
-    };
-
+    let DB = { transactions: [], quickAdds: [], categories: [], loans: [], cycles: [], receivables: [], goals: [], wallets: [], budgets: [] };
     const PALETTE = ["#2a9d8f", "#f4a261", "#457b9d", "#e9c46a", "#8ab17d", "#e76f51", "#f9744b", "#124d54", "#d62828"];
+
+    // --- Utilities ล้างลูกน้ำและวันเวลาเพื่อป้องกันบั๊ก ---
+    function cleanNum(val) {
+      if (val === undefined || val === null || val === '') return 0;
+      const cleaned = String(val).replace(/,/g, '').trim();
+      const num = parseFloat(cleaned);
+      return isNaN(num) ? 0 : num;
+    }
+
+    function parseSafeDate(dateStr) {
+      if (!dateStr) return null;
+      const s = String(dateStr).trim().replace(' ', 'T');
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? new Date(0) : d;
+    }
 
     // 1. Data Fetching
     async function fetchAllData() {
@@ -376,19 +379,48 @@
       renderRawTable();
     }
 
-    // 2. Tabs Management
     function switchTab(tabId, btnElement) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
       document.getElementById(tabId).classList.remove('hidden');
       if (btnElement) btnElement.classList.add('active');
-
-      if (tabId === 'tab-dash') {
-        setTimeout(renderDashboardCharts, 100);
-      }
+      if (tabId === 'tab-dash') setTimeout(renderDashboardCharts, 100);
     }
 
-    // 3. Dropdowns Populate
+    // 3. Dropdowns
+    function getWalletList() {
+      const set = new Set();
+      // ดึงจากตั้งค่า Wallets
+      if (DB.wallets && DB.wallets.length > 1) {
+        DB.wallets.slice(1).forEach(r => {
+          if (r[0] && String(r[0]).trim()) set.add(String(r[0]).trim());
+        });
+      }
+      // ดึงจากประวัติเก่าที่เคยทำรายการ (เช่น เงินสด, เป๋าตัง)
+      if (DB.transactions && DB.transactions.length > 1) {
+        DB.transactions.slice(1).forEach(r => {
+          if (r[5] && String(r[5]).trim()) set.add(String(r[5]).trim());
+        });
+      }
+      const list = Array.from(set);
+      return list.length > 0 ? list : ["🏦 กรุงไทย", "📱 TrueMoney Wallet", "🌸 ออมสิน"];
+    }
+
+    function getCategoriesMap() {
+      const map = { 'รายจ่าย': {}, 'รายรับ': {} };
+      if (!DB.categories) return map;
+      DB.categories.slice(1).forEach(r => {
+        const rawType = String(r[0] || '').trim();
+        const key = rawType.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
+        const main = String(r[1] || '').trim();
+        const sub = String(r[2] || '').trim();
+        
+        if (!map[key][main]) map[key][main] = [];
+        if (sub && !map[key][main].includes(sub)) map[key][main].push(sub);
+      });
+      return map;
+    }
+
     function populateDropdowns() {
       const wallets = getWalletList();
       const wSelects = ['tx-wallet', 'tx-from', 'tx-to', 'debt-wallet', 'debt-return-wallet', 'raw-wallet'];
@@ -400,60 +432,52 @@
         }
       });
 
-      // Categories
-      const mainCatSelect = document.getElementById('tx-cat');
-      mainCatSelect.innerHTML = '';
-      const catMap = getCategoriesMap();
-      const expenseCats = Object.keys(catMap['💸 รายจ่าย'] || {});
-      if (expenseCats.length === 0) {
-        ['อาหาร/เครื่องดื่ม', 'ค่าเดินทาง', 'ของใช้ส่วนตัว'].forEach(c => mainCatSelect.innerHTML += `<option value="${c}">${c}</option>`);
-      } else {
-        expenseCats.forEach(c => mainCatSelect.innerHTML += `<option value="${c}">${c}</option>`);
-      }
-      renderSubCats();
-
-      // Cycles
+      renderTxFormFields();
+      
       const cycleSelect = document.getElementById('dash-cycle-select');
       cycleSelect.innerHTML = '<option value="ALL">🌟 แสดงข้อมูลทั้งหมด (All Time)</option>';
-      const cycleRows = DB.cycles.slice(1);
-      cycleRows.reverse().forEach((r) => {
-        cycleSelect.innerHTML += `<option value="${r[0]}">${r[3] === 'ACTIVE' ? '🟢 ' : '📅 '} ${r[0]}</option>`;
-      });
-    }
-
-    function getWalletList() {
-      if (!DB.wallets || DB.wallets.length <= 1) return ["🏦 กรุงไทย", "📱 TrueMoney Wallet", "🌸 ออมสิน"];
-      return DB.wallets.slice(1).map(r => String(r[0]).trim()).filter(Boolean);
-    }
-
-    function getCategoriesMap() {
-      const map = { '💸 รายจ่าย': {}, '📥 รายรับ': {} };
-      if (!DB.categories) return map;
-      DB.categories.slice(1).forEach(r => {
-        const type = r[0], main = r[1], sub = r[2];
-        if (!map[type]) map[type] = {};
-        if (!map[type][main]) map[type][main] = [];
-        if (sub && !map[type][main].includes(sub)) map[type][main].push(sub);
-      });
-      return map;
-    }
-
-    function renderSubCats() {
-      const mainCat = document.getElementById('tx-cat').value;
-      const subSelect = document.getElementById('tx-subcat');
-      subSelect.innerHTML = '<option value="ทั่วไป">ทั่วไป</option>';
-      const catMap = getCategoriesMap();
-      const subs = (catMap['💸 รายจ่าย'] && catMap['💸 รายจ่าย'][mainCat]) || [];
-      subs.forEach(s => subSelect.innerHTML += `<option value="${s}">${s}</option>`);
+      if(DB.cycles && DB.cycles.length > 1){
+        DB.cycles.slice(1).reverse().forEach(r => {
+          cycleSelect.innerHTML += `<option value="${r[0]}">${r[3] === 'ACTIVE' ? '🟢 ' : '📅 '} ${r[0]}</option>`;
+        });
+      }
     }
 
     function renderTxFormFields() {
-      const type = document.getElementById('tx-type').value;
+      const type = document.getElementById('tx-type').value; // 'รายจ่าย', 'รายรับ', etc
       document.getElementById('field-transfer').classList.toggle('hidden', type !== 'โอนย้ายกระเป๋า');
       document.getElementById('field-savings').classList.toggle('hidden', type !== 'เงินออม');
       document.getElementById('field-cats').classList.toggle('hidden', type === 'โอนย้ายกระเป๋า' || type === 'เงินออม');
       document.getElementById('field-wallet').classList.toggle('hidden', type === 'โอนย้ายกระเป๋า');
-      if (type === 'เงินออม') renderSavingsGoals();
+      
+      if (type === 'เงินออม') {
+        renderSavingsGoals();
+      } else if (type === 'รายจ่าย' || type === 'รายรับ') {
+        const mainCatSelect = document.getElementById('tx-cat');
+        mainCatSelect.innerHTML = '';
+        const catMap = getCategoriesMap();
+        const targetKey = type.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
+        const cats = Object.keys(catMap[targetKey] || {});
+        
+        if (cats.length === 0) {
+          ['อาหาร/เครื่องดื่ม', 'ค่าเดินทาง', 'ทั่วไป'].forEach(c => mainCatSelect.innerHTML += `<option value="${c}">${c}</option>`);
+        } else {
+          cats.forEach(c => mainCatSelect.innerHTML += `<option value="${c}">${c}</option>`);
+        }
+        renderSubCats();
+      }
+    }
+
+    function renderSubCats() {
+      const type = document.getElementById('tx-type').value;
+      const targetKey = type.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
+      const mainCat = document.getElementById('tx-cat').value;
+      const subSelect = document.getElementById('tx-subcat');
+      subSelect.innerHTML = '<option value="ทั่วไป">ทั่วไป</option>';
+      
+      const catMap = getCategoriesMap();
+      const subs = (catMap[targetKey] && catMap[targetKey][mainCat]) || [];
+      subs.forEach(s => subSelect.innerHTML += `<option value="${s}">${s}</option>`);
     }
 
     function renderSavingsGoals() {
@@ -461,11 +485,11 @@
       select.innerHTML = '<option value="📦 คลังออมทั่วไป">📦 คลังออมทั่วไป</option>';
       if (!DB.goals) return;
       DB.goals.slice(1).forEach(r => {
-        select.innerHTML += `<option value="${r[1]}">${r[0] || '🎯'} ${r[1]} (สะสม: ฿${parseFloat(r[3]||0).toLocaleString()})</option>`;
+        const saved = cleanNum(r[3]);
+        select.innerHTML += `<option value="${r[1]}">${r[0] || '🎯'} ${r[1]} (สะสม: ฿${saved.toLocaleString()})</option>`;
       });
     }
 
-    // 4. Savings Split Slider Logic
     function toggleSavingsSplitMode() {
       const mode = document.querySelector('input[name="sav_alloc_mode"]:checked').value;
       document.getElementById('box-goal-single').classList.toggle('hidden', mode === 'split');
@@ -474,7 +498,7 @@
 
       if (mode === 'split') {
         splitBox.innerHTML = '';
-        const goals = (DB.goals && DB.goals.length > 1) ? DB.goals.slice(1) : [['🎯', 'เป้าหมาย 1'], ['🎯', 'เป้าหมาย 2']];
+        const goals = (DB.goals && DB.goals.length > 1) ? DB.goals.slice(1) : [['🎯', 'เป้าหมาย 1']];
         const count = goals.length || 1;
         const initialPct = (100 / count).toFixed(1);
         goals.forEach((g, i) => {
@@ -493,7 +517,7 @@
     }
 
     function updateSplitAmounts() {
-      const totalAmt = parseFloat(document.getElementById('tx-amount').value) || 0;
+      const totalAmt = cleanNum(document.getElementById('tx-amount').value);
       const ranges = document.querySelectorAll('.split-range');
       ranges.forEach(r => {
         const pct = parseFloat(r.value);
@@ -504,7 +528,7 @@
       });
     }
 
-    // 5. Dashboard Calculations & Rendering
+    // 5. Dashboard Calculations
     function renderDashboard() {
       const txRows = (DB.transactions && DB.transactions.length > 1) ? DB.transactions.slice(1) : [];
       const selectedCycle = document.getElementById('dash-cycle-select').value;
@@ -513,10 +537,10 @@
       if (selectedCycle !== "ALL" && DB.cycles) {
         const cycle = DB.cycles.slice(1).find(c => c[0] === selectedCycle);
         if (cycle) {
-          const start = new Date(cycle[1]);
-          const end = cycle[2] ? new Date(cycle[2]) : new Date(8640000000000000);
+          const start = parseSafeDate(cycle[1]);
+          const end = cycle[2] ? parseSafeDate(cycle[2]) : new Date(8640000000000000);
           filteredTx = txRows.filter(r => {
-            const d = new Date(r[0]);
+            const d = parseSafeDate(r[0]);
             return d >= start && d <= end;
           });
         }
@@ -529,7 +553,7 @@
       txRows.forEach(r => {
         const type = String(r[1]).trim();
         const cat = String(r[2]).trim();
-        const amt = parseFloat(String(r[3] || '0').replace(/,/g, '')) || 0;
+        const amt = cleanNum(r[3]);
         const w = String(r[5]).trim();
 
         if (type.includes("โอนย้าย")) {
@@ -571,7 +595,7 @@
       let inc = 0, exp = 0, sav = 0, inv = 0;
       filteredTx.forEach(r => {
         const type = String(r[1]).trim();
-        const amt = parseFloat(r[3]) || 0;
+        const amt = cleanNum(r[3]);
         if (type.includes("รายรับ") && !type.includes("รับคืน")) inc += amt;
         if (type.includes("รายจ่าย")) exp += amt;
         if (type === "เงินออม") sav += amt;
@@ -589,7 +613,6 @@
       renderDashboardCharts(filteredTx);
     }
 
-    // 6. Smart Budget Tracker
     function renderBudgetTracker(txRows) {
       const container = document.getElementById('budget-progress-container');
       container.innerHTML = '';
@@ -601,7 +624,7 @@
       const spentMap = {};
       txRows.filter(r => String(r[1]).includes("รายจ่าย")).forEach(r => {
         const cat = String(r[2]).trim();
-        const amt = parseFloat(r[3]) || 0;
+        const amt = cleanNum(r[3]);
         spentMap[cat] = (spentMap[cat] || 0) + amt;
         const mainCat = cat.split(':')[0].trim();
         spentMap[mainCat] = (spentMap[mainCat] || 0) + amt;
@@ -609,7 +632,7 @@
 
       DB.budgets.slice(1).forEach(b => {
         const name = b[0];
-        const budget = parseFloat(b[1]) || 0;
+        const budget = cleanNum(b[1]);
         const spent = spentMap[name] || 0;
         const pct = budget > 0 ? (spent / budget) * 100 : 0;
         let color = "#2a9d8f";
@@ -630,7 +653,6 @@
       });
     }
 
-    // 7. Plotly Visualizations (Pie, Bar, Treemap)
     function renderDashboardCharts(txList) {
       const txRows = txList || ((DB.transactions && DB.transactions.length > 1) ? DB.transactions.slice(1) : []);
       const expRows = txRows.filter(r => String(r[1]).includes("รายจ่าย"));
@@ -638,7 +660,7 @@
       const catTotals = {}, subTotals = {}, treeData = [];
       expRows.forEach(r => {
         const fullCat = String(r[2]).trim();
-        const amt = parseFloat(r[3]) || 0;
+        const amt = cleanNum(r[3]);
         const main = fullCat.split(':')[0].trim();
         const sub = fullCat.includes(':') ? fullCat.split(':')[1].trim() : 'ทั่วไป';
         const note = r[4] ? String(r[4]).trim() : 'ไม่ระบุ Note';
@@ -648,7 +670,6 @@
         treeData.push({ main, sub, note, amt });
       });
 
-      // Pie Chart
       const pieValues = Object.values(catTotals);
       const pieLabels = Object.keys(catTotals);
       Plotly.newPlot('chart-pie', [{
@@ -659,7 +680,6 @@
         marker: { colors: PALETTE }
       }], { margin: { t: 10, b: 10, l: 10, r: 10 }, showlegend: false }, { responsive: true });
 
-      // Subcategory Bar Chart
       const barLabels = Object.keys(subTotals).slice(0, 8);
       const barValues = barLabels.map(l => subTotals[l]);
       Plotly.newPlot('chart-subcat', [{
@@ -670,7 +690,6 @@
         marker: { color: '#f9744b' }
       }], { margin: { t: 10, b: 20, l: 90, r: 10 }, yaxis: { autorange: 'reversed' } }, { responsive: true });
 
-      // Treemap Deep Dive
       if (treeData.length > 0) {
         Plotly.newPlot('chart-treemap', [{
           type: "treemap",
@@ -698,9 +717,9 @@
       tbody.innerHTML = '';
 
       rows.forEach((r, idx) => {
-        const amt = parseFloat(r[3]) || 0;
-        const status = r[6];
-        if (status === '⏳ รอคืนเงิน') {
+        const amt = cleanNum(r[3]);
+        const status = String(r[6]);
+        if (status.includes('รอคืนเงิน')) {
           pending += amt;
           select.innerHTML += `<option value="${idx + 2}">#${r[0]} - ${r[1]} (${r[2]} ฿${amt.toLocaleString()})</option>`;
         } else {
@@ -725,12 +744,11 @@
       container.innerHTML = '';
       let alloc = 0;
 
-      // คำนวณยอดเงินออมรวมจาก Transactions
       let totalSavings = 0;
       if (DB.transactions && DB.transactions.length > 1) {
         DB.transactions.slice(1).forEach(r => {
           const type = String(r[1]).trim();
-          const amt = parseFloat(r[3]) || 0;
+          const amt = cleanNum(r[3]);
           if (type === "เงินออม") totalSavings += amt;
           if (type.includes("ถอนเงินออม")) totalSavings -= amt;
         });
@@ -738,8 +756,8 @@
 
       rows.forEach(r => {
         const name = r[1];
-        const target = parseFloat(r[2]) || 1;
-        const saved = parseFloat(r[3]) || 0;
+        const target = cleanNum(r[2]) || 1;
+        const saved = cleanNum(r[3]);
         alloc += saved;
         const pct = Math.min((saved / target) * 100, 100);
 
@@ -762,12 +780,12 @@
       document.getElementById('lbl-goal-rem').innerText = `฿${remainingUnallocated.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
     }
 
-    // 10. Loan Simulator (EMI Calculation)
+    // 10. Loan Simulator
     function renderLoanSimulator() {
       if (!DB.loans || DB.loans.length <= 1) return;
       const loan = DB.loans[1];
-      const P = parseFloat(loan[0]) || 10000;
-      const annualR = parseFloat(loan[1]) || 15;
+      const P = cleanNum(loan[0]) || 10000;
+      const annualR = cleanNum(loan[1]) || 15;
       const n = parseInt(loan[2]) || 12;
       const paidMonths = parseInt(loan[3]) || 0;
       const lastMonthPaid = String(loan[4] || "").trim();
@@ -782,7 +800,6 @@
       document.getElementById('loan-interest').innerText = `฿${totalInterest.toFixed(2)}`;
       document.getElementById('loan-progress').innerText = `${paidMonths}/${n} งวด`;
 
-      // เช็คสถานะการล็อกปุ่มชำระงวด
       const nowMonth = getNowString().slice(0, 7);
       const btnPay = document.getElementById('btn-pay-loan');
       const statusText = document.getElementById('loan-status-text');
@@ -794,14 +811,13 @@
       } else if (lastMonthPaid === nowMonth) {
         btnPay.disabled = true;
         btnPay.innerText = "🔒 จ่ายงวดของเดือนนี้แล้ว";
-        statusText.innerText = `งวดที่ ${paidMonths} ถูกตัดบัญชีไปแล้วในเดือน ${lastMonthPaid} (ระบบจะเปิดให้จ่ายใหม่อัตโนมัติเมื่อขึ้นเดือนใหม่)`;
+        statusText.innerText = `งวดที่ ${paidMonths} ถูกตัดบัญชีไปแล้ว (ระบบจะเปิดให้จ่ายใหม่อัตโนมัติเมื่อขึ้นเดือนใหม่)`;
       } else {
         btnPay.disabled = false;
         btnPay.innerText = "💸 เช็คบิลจ่ายงวดเดือนนี้";
         statusText.innerText = `พร้อมชำระงวดที่ ${paidMonths + 1}/${n}`;
       }
 
-      // Schedule Table
       let balance = P;
       const tbody = document.getElementById('loan-schedule-body');
       tbody.innerHTML = '';
@@ -819,11 +835,11 @@
       }
     }
 
-    // 11. Handlers & Submit Actions
+    // 11. API Submit Actions
     async function handleTransactionSubmit(e) {
       e.preventDefault();
       const type = document.getElementById('tx-type').value;
-      const amount = parseFloat(document.getElementById('tx-amount').value);
+      const amount = cleanNum(document.getElementById('tx-amount').value);
       const note = document.getElementById('tx-note').value;
       const timeVal = document.getElementById('tx-time').value.length === 5 ? `${document.getElementById('tx-time').value}:00` : document.getElementById('tx-time').value;
       const date = `${document.getElementById('tx-date').value} ${timeVal}`;
@@ -850,7 +866,7 @@
             goalUpdates.push({ goalName: goal, delta: action === 'เบิกออกมาใช้' ? -amount : amount });
           }
         } else {
-          // โหมด Split หลายเป้าหมาย
+          // Mode Split (แบ่งหลายกองพร้อมกัน)
           const ranges = document.querySelectorAll('.split-range');
           for (let r of ranges) {
             const pct = parseFloat(r.value);
@@ -894,20 +910,15 @@
     async function handleAddGoal(e) {
       e.preventDefault();
       const name = document.getElementById('g-name').value.trim();
-      const target = parseFloat(document.getElementById('g-target').value);
-      const saved = parseFloat(document.getElementById('g-saved').value) || 0;
+      const target = cleanNum(document.getElementById('g-target').value);
+      const saved = cleanNum(document.getElementById('g-saved').value) || 0;
       const pri = document.getElementById('g-priority').value;
 
       if (!name || target <= 0) return;
-
       const currentGoals = DB.goals ? DB.goals.slice(0) : [["ไอคอน", "ชื่อเป้าหมาย", "เป้าหมาย (บาท)", "สะสมแล้ว (บาท)", "ความสำคัญ"]];
       currentGoals.push(["🎯", name, target, saved, pri]);
 
-      await sendApi({
-        action: "save_table",
-        sheetName: "Goals",
-        rows: currentGoals
-      });
+      await sendApi({ action: "save_table", sheetName: "Goals", rows: currentGoals });
       await fetchAllData();
     }
 
@@ -917,7 +928,7 @@
         action: "add_receivable",
         who: document.getElementById('debt-who').value,
         desc: document.getElementById('debt-desc').value,
-        amount: parseFloat(document.getElementById('debt-amt').value),
+        amount: cleanNum(document.getElementById('debt-amt').value),
         wallet: document.getElementById('debt-wallet').value,
         date: getNowString()
       });
@@ -931,8 +942,8 @@
       const returnWallet = document.getElementById('debt-return-wallet').value;
       const text = select.options[select.selectedIndex].text;
       const who = text.split('-')[1].split('(')[0].trim();
-      const amtStr = text.split('฿')[1].replace(')', '').replace(/,/g, '').trim();
-      const amt = parseFloat(amtStr);
+      const amtStr = text.split('฿')[1].replace(')', '');
+      const amt = cleanNum(amtStr);
 
       await sendApi({
         action: "pay_receivable",
@@ -948,7 +959,7 @@
     async function handlePayLoan() {
       const loan = DB.loans[1];
       const nextMonth = parseInt(loan[3]) + 1;
-      const emi = parseFloat(document.getElementById('loan-emi').innerText.replace('฿', '').replace(/,/g, ''));
+      const emi = cleanNum(document.getElementById('loan-emi').innerText.replace('฿', ''));
       await sendApi({
         action: "pay_loan",
         nextMonth: nextMonth,
@@ -966,8 +977,8 @@
       const adjustments = [];
       inputs.forEach(inp => {
         if (inp.value) {
-          const target = parseFloat(inp.value);
-          const curr = parseFloat(inp.dataset.curr);
+          const target = cleanNum(inp.value);
+          const curr = cleanNum(inp.dataset.curr);
           const diff = target - curr;
           if (Math.abs(diff) >= 0.01) {
             adjustments.push({
@@ -985,6 +996,7 @@
       }
     }
 
+    // ** ส่งข้อมูลไป Apps Script อย่างปลอดภัย **
     async function sendApi(payload) {
       showLoading(true);
       try {
@@ -994,8 +1006,7 @@
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
-        // หน่วงเวลาเล็กน้อยเพื่อให้ Google Sheets Commit ข้อมูลลงแถวเรียบร้อย
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 1200)); // หน่วงเวลาให้ Sheets เขียนข้อมูลสำเร็จ
       } catch (err) {
         console.error("API Error:", err);
       } finally {
@@ -1022,7 +1033,7 @@
             date: getNowString(),
             type: q[1],
             category: q[2],
-            amount: parseFloat(q[3]),
+            amount: cleanNum(q[3]),
             note: "บันทึกด่วน (" + q[0] + ")",
             wallet: getWalletList()[0]
           });
@@ -1049,13 +1060,13 @@
         tbody.innerHTML += `
           <tr class="border-b border-slate-100">
             <td class="p-2">${r[0]}</td><td class="p-2 font-medium">${r[1]}</td><td class="p-2">${r[2]}</td>
-            <td class="p-2 font-semibold">฿${parseFloat(r[3]||0).toLocaleString()}</td><td class="p-2">${r[5]}</td><td class="p-2 text-slate-400">${r[4]||''}</td>
+            <td class="p-2 font-semibold">฿${cleanNum(r[3]).toLocaleString()}</td><td class="p-2">${r[5]}</td><td class="p-2 text-slate-400">${r[4]||''}</td>
           </tr>
         `;
       });
     }
 
-    // Helpers
+    // Helper functions
     function getNowString() {
       const now = new Date();
       const pad = (n) => String(n).padStart(2, '0');
@@ -1072,7 +1083,7 @@
       if (spinner) spinner.classList.toggle('hidden', !show);
     }
 
-    // On Load
+    // Initial Load
     window.addEventListener('DOMContentLoaded', fetchAllData);
   </script>
 </body>
