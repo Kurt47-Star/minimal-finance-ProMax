@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Minimal Finance Pro - Dashboard</title>
+  <title>Minimal Finance Pro - New Transaction</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,6 +15,8 @@
           fontFamily: { sans: ['Poppins', 'Prompt', 'sans-serif'] },
           colors: {
             brand: { 500: '#f9744b', 600: '#e2643c' },
+            income: { 500: '#2a9d8f' },
+            saving: { 500: '#457b9d' },
             card: { light: '#ffffff', dark: '#1e293b' },
             bg: { light: '#f8fafc', dark: '#0f172a' }
           }
@@ -23,174 +25,168 @@
     }
   </script>
   <style>
-    /* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* แอนิเมชันตอนสลับโหมด */
-    body { transition: background-color 0.3s ease, color 0.3s ease; }
+    /* ลบลูกศรขึ้นลงในช่อง input number */
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   </style>
 </head>
-<body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 antialiased pb-20 md:pb-0">
+<body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 antialiased pb-20 md:pb-0 transition-colors duration-300">
 
-  <!-- 💻 Sidebar (สำหรับจอ PC) -->
+  <!-- 💻 Sidebar (ซ่อนในมือถือ) -->
   <aside class="hidden md:flex flex-col w-64 h-screen fixed top-0 left-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50">
     <div class="p-6">
       <h1 class="text-2xl font-bold text-brand-500 tracking-wide">MF Pro<span class="text-brand-500 text-3xl">.</span></h1>
     </div>
     <nav class="flex-1 px-4 space-y-2">
-      <a href="#" class="flex items-center gap-3 px-4 py-3 bg-brand-500/10 text-brand-500 dark:bg-brand-500/20 dark:text-brand-500 rounded-xl font-medium transition-all">
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
         <span class="text-xl">📊</span> Dashboard
       </a>
-      <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
+      <a href="#" class="flex items-center gap-3 px-4 py-3 bg-brand-500/10 text-brand-500 dark:bg-brand-500/20 dark:text-brand-500 rounded-xl font-medium transition-all">
         <span class="text-xl">✨</span> Transactions
       </a>
       <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
         <span class="text-xl">🎯</span> Goals
       </a>
-      <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
-        <span class="text-xl">⚙️</span> Settings
-      </a>
     </nav>
-    <div class="p-4 border-t border-slate-200 dark:border-slate-800">
-      <div class="flex items-center gap-3 px-4 py-2 text-sm text-slate-500 dark:text-slate-400">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-500 to-amber-400"></div>
-        <div>
-          <p class="font-semibold text-slate-800 dark:text-slate-200">Director</p>
-          <p class="text-xs">Premium Plan</p>
-        </div>
-      </div>
-    </div>
   </aside>
 
-  <!-- 📱 Bottom Navigation (สำหรับหน้าจอมือถือ) -->
+  <!-- 📱 Bottom Navigation (สำหรับมือถือ) -->
   <nav class="md:hidden fixed bottom-0 left-0 w-full h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center px-2 pb-safe">
-    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-brand-500">
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-brand-500 transition-colors">
       <span class="text-xl mb-1">📊</span>
-      <span class="text-[10px] font-medium">Home</span>
     </a>
-    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-brand-500 transition-colors">
       <span class="text-xl mb-1">✨</span>
-      <span class="text-[10px] font-medium">Tx</span>
     </a>
-    <!-- ปุ่มบวก (FAB) กลางเมนูมือถือ -->
     <div class="relative w-full flex justify-center -top-4">
       <button class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-brand-500/40 active:scale-95 transition-transform">
         +
       </button>
     </div>
-    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 transition-colors">
       <span class="text-xl mb-1">🎯</span>
-      <span class="text-[10px] font-medium">Goals</span>
     </a>
-    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 transition-colors">
       <span class="text-xl mb-1">⚙️</span>
-      <span class="text-[10px] font-medium">Settings</span>
     </a>
   </nav>
 
   <!-- พื้นที่แสดงผลหลัก (Main Content) -->
-  <main class="md:ml-64 p-4 md:p-8 max-w-7xl mx-auto">
+  <main class="md:ml-64 p-4 md:p-8 max-w-2xl mx-auto">
     
-    <!-- Top Bar -->
-    <header class="flex justify-between items-center mb-8 pt-2">
-      <div>
-        <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">Overview</h2>
-        <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400">รอบบัญชี: October 2026</p>
-      </div>
-      <div class="flex items-center gap-3">
-        <!-- ปุ่มสลับโหมด Dark/Light -->
-        <button id="theme-toggle" class="p-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-all text-slate-500 dark:text-slate-300">
-          <span id="theme-icon">☀️</span>
-        </button>
-      </div>
+    <header class="flex justify-between items-center mb-6 pt-2">
+      <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">New Transaction</h2>
+      <button class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">✕ Cancel</button>
     </header>
 
-    <!-- Net Wealth Banner -->
-    <section class="mb-8">
-      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 p-6 md:p-8 border border-slate-700/50 shadow-xl shadow-slate-900/10">
-        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <p class="text-slate-400 text-sm font-medium mb-1">รวมเงินทั้งหมด (Net Wealth)</p>
-            <h3 class="text-4xl md:text-5xl font-bold text-white tracking-tight">฿5,881<span class="text-slate-500 text-2xl">.96</span></h3>
-          </div>
-          <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex gap-6 border border-white/10">
-            <div>
-              <p class="text-slate-400 text-xs mb-1">รายรับรอบนี้</p>
-              <p class="text-emerald-400 font-semibold">฿4,200.00</p>
-            </div>
-            <div>
-              <p class="text-slate-400 text-xs mb-1">รายจ่ายรอบนี้</p>
-              <p class="text-brand-500 font-semibold">฿1,850.50</p>
-            </div>
-          </div>
-        </div>
-        <!-- ตกแต่งแบคกราวด์ -->
-        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-brand-500/20 blur-3xl rounded-full"></div>
-        <div class="absolute -left-10 -top-10 w-32 h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
-      </div>
-    </section>
-
-    <!-- Wallets Row (เลื่อนแนวนอนได้บนมือถือ) -->
-    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3">กระเป๋าเงินของคุณ (Wallets)</h3>
-    <section class="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+    <!-- Form Container -->
+    <section class="bg-white dark:bg-card-dark p-5 md:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
       
-      <!-- Wallet Card 1 -->
-      <div class="min-w-[160px] md:min-w-[200px] bg-white dark:bg-card-dark p-4 rounded-2xl border-l-4 border-l-emerald-500 border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-1 transition-transform">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-sm">🏦</span>
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">กรุงไทย</span>
-        </div>
-        <p class="text-xl font-bold text-slate-800 dark:text-white">฿4,100.23</p>
+      <!-- 1. Transaction Type Toggle -->
+      <div class="flex overflow-x-auto gap-2 pb-2 mb-6 no-scrollbar" id="type-selector">
+        <button class="type-btn active px-5 py-2.5 rounded-full text-sm font-medium bg-brand-500 text-white transition-all whitespace-nowrap shadow-md shadow-brand-500/30" data-type="expense">💸 รายจ่าย</button>
+        <button class="type-btn px-5 py-2.5 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 transition-all whitespace-nowrap" data-type="income">📥 รายรับ</button>
+        <button class="type-btn px-5 py-2.5 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 transition-all whitespace-nowrap" data-type="transfer">🔄 โอนย้าย</button>
+        <button class="type-btn px-5 py-2.5 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 transition-all whitespace-nowrap" data-type="saving">🐷 เงินออม</button>
       </div>
 
-      <!-- Wallet Card 2 -->
-      <div class="min-w-[160px] md:min-w-[200px] bg-white dark:bg-card-dark p-4 rounded-2xl border-l-4 border-l-amber-500 border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-1 transition-transform">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-sm">📱</span>
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">TrueMoney</span>
+      <!-- 2. Amount Input (ยอดเงิน) -->
+      <div class="mb-8 text-center">
+        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">จำนวนเงิน (THB)</label>
+        <div class="flex justify-center items-end gap-1">
+          <span class="text-3xl text-slate-400 dark:text-slate-500 font-bold mb-1">฿</span>
+          <input type="number" placeholder="0.00" class="w-full max-w-[250px] text-5xl md:text-6xl font-bold bg-transparent text-center text-slate-800 dark:text-white outline-none placeholder-slate-300 dark:placeholder-slate-700 transition-colors" id="amount-input">
         </div>
-        <p class="text-xl font-bold text-slate-800 dark:text-white">฿14.35</p>
+        <div class="h-0.5 w-32 bg-slate-200 dark:bg-slate-700 mx-auto mt-2 rounded-full transition-colors" id="amount-line"></div>
       </div>
 
-      <!-- Wallet Card 3 -->
-      <div class="min-w-[160px] md:min-w-[200px] bg-white dark:bg-card-dark p-4 rounded-2xl border-l-4 border-l-blue-400 border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-1 transition-transform">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="text-sm">🌸</span>
-          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">ออมสิน</span>
+      <!-- 3. Date & Time Selection -->
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label class="text-xs font-semibold text-slate-400 uppercase mb-2 block">วันที่</label>
+          <div class="flex gap-2">
+            <button class="flex-1 py-3 rounded-xl bg-brand-500/10 text-brand-500 border border-brand-500/20 text-sm font-medium transition-colors" id="date-today">วันนี้</button>
+            <button class="flex-1 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-500 text-sm font-medium transition-colors">เมื่อวาน</button>
+          </div>
         </div>
-        <p class="text-xl font-bold text-slate-800 dark:text-white">฿1,078.29</p>
+        <div>
+          <label class="text-xs font-semibold text-slate-400 uppercase mb-2 block">เวลา</label>
+          <input type="time" value="14:30" class="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm font-medium outline-none focus:border-brand-500">
+        </div>
       </div>
+
+      <!-- 4. Categories & Wallet -->
+      <div class="space-y-4 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="text-xs font-semibold text-slate-400 uppercase mb-2 block">กระเป๋าเงิน (Wallet)</label>
+            <select class="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-brand-500 appearance-none">
+              <option>🏦 กรุงไทย</option>
+              <option>📱 TrueMoney</option>
+              <option>🌸 ออมสิน</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-400 uppercase mb-2 block">หมวดหมู่ (Category)</label>
+            <select class="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-brand-500 appearance-none">
+              <option>อาหาร/เครื่องดื่ม</option>
+              <option>เดินทาง</option>
+              <option>ของใช้ส่วนตัว</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-400 uppercase mb-2 block">รายละเอียด (Note)</label>
+          <input type="text" placeholder="ซื้อที่ไหน ทำอะไร..." class="w-full py-3 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-brand-500">
+        </div>
+      </div>
+
+      <!-- 5. Save Button -->
+      <button class="w-full py-4 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-semibold text-lg shadow-xl shadow-brand-500/20 active:scale-[0.98] transition-all" id="save-btn">
+        บันทึกรายการ
+      </button>
 
     </section>
-
-    <!-- Placeholder สำหรับกราฟ (รอเชื่อมต่อข้อมูลจริง) -->
-    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-      <div class="bg-white dark:bg-card-dark h-64 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-slate-400 dark:text-slate-600 border-dashed">
-        <span class="text-3xl mb-2">📊</span>
-        <p class="text-sm font-medium">Expense Chart Placeholder</p>
-      </div>
-      <div class="bg-white dark:bg-card-dark h-64 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-slate-400 dark:text-slate-600 border-dashed">
-        <span class="text-3xl mb-2">🛡️</span>
-        <p class="text-sm font-medium">Budget Tracker Placeholder</p>
-      </div>
-    </section>
-
   </main>
 
-  <!-- Script สำหรับปุ่มสลับโหมด Dark/Light -->
   <script>
-    const themeToggleBtn = document.getElementById('theme-toggle');
-    const themeIcon = document.getElementById('theme-icon');
-    const htmlEl = document.documentElement;
+    // สคริปต์ทำ Dynamic Color เปลี่ยนสีแอปตามประเภทรายรับ/รายจ่าย
+    const typeBtns = document.querySelectorAll('.type-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const amountLine = document.getElementById('amount-line');
+    const dateToday = document.getElementById('date-today');
 
-    themeToggleBtn.addEventListener('click', () => {
-      if (htmlEl.classList.contains('dark')) {
-        htmlEl.classList.remove('dark');
-        themeIcon.textContent = '🌙';
-      } else {
-        htmlEl.classList.add('dark');
-        themeIcon.textContent = '☀️';
-      }
+    const colors = {
+      expense: { bg: 'bg-brand-500', shadow: 'shadow-brand-500/30', border: 'border-brand-500/20', text: 'text-brand-500', lightBg: 'bg-brand-500/10' },
+      income: { bg: 'bg-income-500', shadow: 'shadow-income-500/30', border: 'border-income-500/20', text: 'text-income-500', lightBg: 'bg-income-500/10' },
+      saving: { bg: 'bg-saving-500', shadow: 'shadow-saving-500/30', border: 'border-saving-500/20', text: 'text-saving-500', lightBg: 'bg-saving-500/10' },
+      transfer: { bg: 'bg-slate-700', shadow: 'shadow-slate-700/30', border: 'border-slate-700/20', text: 'text-slate-700', lightBg: 'bg-slate-700/10' }
+    };
+
+    function resetBtnStyles(btn) {
+      btn.className = "type-btn px-5 py-2.5 rounded-full text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 transition-all whitespace-nowrap";
+    }
+
+    typeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        typeBtns.forEach(resetBtnStyles);
+        
+        const type = btn.getAttribute('data-type');
+        const c = colors[type] || colors.expense;
+
+        // เปลี่ยนสีปุ่มที่ถูกกด
+        btn.className = `type-btn active px-5 py-2.5 rounded-full text-sm font-medium text-white transition-all whitespace-nowrap shadow-md ${c.bg} ${c.shadow}`;
+
+        // เปลี่ยนสีปุ่ม Save
+        saveBtn.className = `w-full py-4 rounded-2xl text-white font-semibold text-lg shadow-xl active:scale-[0.98] transition-all ${c.bg} ${c.shadow}`;
+
+        // เปลี่ยนสีเส้นใต้จำนวนเงินและปุ่มวันที่
+        amountLine.className = `h-0.5 w-32 mx-auto mt-2 rounded-full transition-colors ${c.bg}`;
+        dateToday.className = `flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${c.lightBg} ${c.text} border ${c.border}`;
+      });
     });
   </script>
 </body>
