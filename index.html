@@ -1,1394 +1,197 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Minimal Finance Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Minimal Finance Pro - Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Poppins', 'Prompt', 'sans-serif'] },
+          colors: {
+            brand: { 500: '#f9744b', 600: '#e2643c' },
+            card: { light: '#ffffff', dark: '#1e293b' },
+            bg: { light: '#f8fafc', dark: '#0f172a' }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    body { font-family: 'Poppins', 'Prompt', sans-serif; background-color: #0f172a; color: #f8fafc; }
-    .metric-card { background: #1e293b; border-radius: 1.25rem; padding: 1.25rem; border: 1px solid #334155; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    .card-panel { background: #1e293b; border-radius: 1.25rem; border: 1px solid #334155; }
-    .tab-btn.active { color: #f9744b; border-bottom: 3px solid #f9744b; font-weight: 600; }
-    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    .table-editor input, .table-editor select {
-      background: transparent;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      padding: 4px 8px;
-      width: 100%;
-      color: #f8fafc;
-      outline: none;
-    }
-    .table-editor input:focus, .table-editor select:focus {
-      background: #0f172a;
-      border-color: #f9744b;
-    }
-    .table-editor tr:hover { background: rgba(51, 65, 85, 0.4); }
+    /* ซ่อน Scrollbar แต่ยังเลื่อนได้ */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* แอนิเมชันตอนสลับโหมด */
+    body { transition: background-color 0.3s ease, color 0.3s ease; }
   </style>
 </head>
-<body class="p-3 md:p-6 max-w-7xl mx-auto">
+<body class="bg-bg-light dark:bg-bg-dark text-slate-800 dark:text-slate-100 antialiased pb-20 md:pb-0">
 
-  <!-- Header -->
-  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3 border-b border-slate-700 pb-4">
-    <div>
-      <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide">Minimal Finance Pro</h1>
-      <p class="text-xs text-slate-400">ระบบบริหารการเงิน & วิเคราะห์ข้อมูลส่วนบุคคล</p>
+  <!-- 💻 Sidebar (สำหรับจอ PC) -->
+  <aside class="hidden md:flex flex-col w-64 h-screen fixed top-0 left-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 z-50">
+    <div class="p-6">
+      <h1 class="text-2xl font-bold text-brand-500 tracking-wide">MF Pro<span class="text-brand-500 text-3xl">.</span></h1>
     </div>
-    <div class="flex items-center gap-3">
-      <button onclick="fetchAllData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1 transition-all">
-        🔄 รีเฟรชข้อมูล
+    <nav class="flex-1 px-4 space-y-2">
+      <a href="#" class="flex items-center gap-3 px-4 py-3 bg-brand-500/10 text-brand-500 dark:bg-brand-500/20 dark:text-brand-500 rounded-xl font-medium transition-all">
+        <span class="text-xl">📊</span> Dashboard
+      </a>
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
+        <span class="text-xl">✨</span> Transactions
+      </a>
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
+        <span class="text-xl">🎯</span> Goals
+      </a>
+      <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl font-medium transition-all">
+        <span class="text-xl">⚙️</span> Settings
+      </a>
+    </nav>
+    <div class="p-4 border-t border-slate-200 dark:border-slate-800">
+      <div class="flex items-center gap-3 px-4 py-2 text-sm text-slate-500 dark:text-slate-400">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand-500 to-amber-400"></div>
+        <div>
+          <p class="font-semibold text-slate-800 dark:text-slate-200">Director</p>
+          <p class="text-xs">Premium Plan</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 📱 Bottom Navigation (สำหรับหน้าจอมือถือ) -->
+  <nav class="md:hidden fixed bottom-0 left-0 w-full h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-50 flex justify-around items-center px-2 pb-safe">
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-brand-500">
+      <span class="text-xl mb-1">📊</span>
+      <span class="text-[10px] font-medium">Home</span>
+    </a>
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+      <span class="text-xl mb-1">✨</span>
+      <span class="text-[10px] font-medium">Tx</span>
+    </a>
+    <!-- ปุ่มบวก (FAB) กลางเมนูมือถือ -->
+    <div class="relative w-full flex justify-center -top-4">
+      <button class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-brand-500/40 active:scale-95 transition-transform">
+        +
       </button>
-      <div id="loading-spinner" class="hidden text-xs text-[#f9744b] font-medium animate-pulse">กำลังซิงค์ข้อมูล...</div>
     </div>
-  </div>
-
-  <!-- Navigation Tabs -->
-  <nav class="flex overflow-x-auto space-x-6 border-b border-slate-700 mb-6 text-sm font-medium text-slate-400 scrollbar-none">
-    <button onclick="switchTab('tab-tx', this)" class="tab-btn active pb-3 flex items-center gap-1.5 whitespace-nowrap">✨ Transactions</button>
-    <button onclick="switchTab('tab-dash', this)" class="tab-btn pb-3 flex items-center gap-1.5 whitespace-nowrap">📊 Dashboard</button>
-    <button onclick="switchTab('tab-debt', this)" class="tab-btn pb-3 flex items-center gap-1.5 whitespace-nowrap">🤝 ลูกหนี้ & หารบิล</button>
-    <button onclick="switchTab('tab-goal', this)" class="tab-btn pb-3 flex items-center gap-1.5 whitespace-nowrap">🎯 Goals</button>
-    <button onclick="switchTab('tab-loan', this)" class="tab-btn pb-3 flex items-center gap-1.5 whitespace-nowrap">🏦 Loan Simulator</button>
-    <button onclick="switchTab('tab-settings', this)" class="tab-btn pb-3 flex items-center gap-1.5 whitespace-nowrap">⚙️ Settings</button>
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+      <span class="text-xl mb-1">🎯</span>
+      <span class="text-[10px] font-medium">Goals</span>
+    </a>
+    <a href="#" class="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+      <span class="text-xl mb-1">⚙️</span>
+      <span class="text-[10px] font-medium">Settings</span>
+    </a>
   </nav>
 
-  <!-- ============================================================== -->
-  <!-- TAB 1: TRANSACTIONS -->
-  <!-- ============================================================== -->
-  <div id="tab-tx" class="tab-content space-y-6">
-    <div>
-      <h3 class="text-xs font-bold text-slate-400 tracking-wider mb-2">QUICK ACTIONS</h3>
-      <div id="quick-add-container" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
-    </div>
-
-    <div class="card-panel p-6 max-w-2xl">
-      <h3 class="text-base font-bold text-white mb-4">บันทึกรายการใหม่</h3>
-      <form onsubmit="handleTransactionSubmit(event)" class="space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">ประเภท</label>
-            <select id="tx-type" onchange="renderTxFormFields()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm outline-none text-white">
-              <option value="รายจ่าย">💸 รายจ่าย</option>
-              <option value="รายรับ">📥 รายรับ</option>
-              <option value="โอนย้ายกระเป๋า">🔄 โอนย้ายกระเป๋า</option>
-              <option value="เงินออม">🐷 เงินออม</option>
-              <option value="เงินลงทุน">📈 เงินลงทุน</option>
-            </select>
-          </div>
-          <div id="field-wallet">
-            <label class="block text-xs font-semibold text-slate-300 mb-1">กระเป๋าเงิน</label>
-            <select id="tx-wallet" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm outline-none text-white"></select>
-          </div>
-        </div>
-
-        <div id="field-transfer" class="hidden grid grid-cols-2 gap-3 bg-amber-950/30 p-3 rounded-xl border border-amber-800">
-          <div>
-            <label class="block text-xs font-medium text-amber-200 mb-1">จากกระเป๋า</label>
-            <select id="tx-from" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs outline-none text-white"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-amber-200 mb-1">เข้ากระเป๋า</label>
-            <select id="tx-to" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs outline-none text-white"></select>
-          </div>
-        </div>
-
-        <div id="field-savings" class="hidden space-y-3 bg-blue-950/30 p-4 rounded-xl border border-blue-800">
-          <div class="flex gap-4 text-xs font-medium">
-            <label class="cursor-pointer text-blue-200"><input type="radio" name="sav_action" value="ฝากเงินเพิ่ม" checked onchange="renderSavingsGoals()"> 📥 ฝากเงินเพิ่ม</label>
-            <label class="cursor-pointer text-blue-200"><input type="radio" name="sav_action" value="เบิกออกมาใช้" onchange="renderSavingsGoals()"> 🔓 เบิกออกมาใช้</label>
-          </div>
-          <div class="flex gap-4 text-xs font-medium">
-            <label class="cursor-pointer text-blue-200"><input type="radio" name="sav_alloc_mode" value="single" checked onchange="toggleSavingsSplitMode()"> 🎯 เป้าหมายเดียว</label>
-            <label class="cursor-pointer text-blue-200"><input type="radio" name="sav_alloc_mode" value="split" onchange="toggleSavingsSplitMode()"> 🔀 แบ่งหลายเป้าหมาย</label>
-          </div>
-          <div id="box-goal-single">
-            <label class="block text-xs font-semibold text-slate-300 mb-1">เลือกเป้าหมาย</label>
-            <select id="tx-goal-slot" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-sm outline-none text-white"></select>
-          </div>
-          <div id="box-goal-split" class="hidden space-y-2"></div>
-        </div>
-
-        <div id="field-cats" class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">หมวดหมู่หลัก</label>
-            <select id="tx-cat" onchange="renderSubCats()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm outline-none text-white"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">หมวดหมู่ย่อย</label>
-            <select id="tx-subcat" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm outline-none text-white"></select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">วันที่</label>
-            <input type="date" id="tx-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-sm outline-none text-white">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">เวลา</label>
-            <input type="time" step="1" id="tx-time" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-sm outline-none text-white">
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">จำนวนเงิน (THB)</label>
-          <input type="number" step="0.01" min="0" id="tx-amount" required placeholder="0.00" oninput="updateSplitAmounts()" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-lg font-bold text-white outline-none">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Note (รายละเอียด)</label>
-          <input type="text" id="tx-note" placeholder="รายละเอียดรายการ..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm outline-none text-white">
-        </div>
-
-        <button type="submit" class="w-full bg-[#f9744b] hover:bg-[#e2643c] text-white font-semibold py-3 rounded-xl shadow-md transition-all active:scale-[0.99]">
-          บันทึกรายการ
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ============================================================== -->
-  <!-- TAB 2: DASHBOARD -->
-  <!-- ============================================================== -->
-  <div id="tab-dash" class="tab-content hidden space-y-6">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 card-panel p-4">
-      <span class="text-sm font-semibold text-slate-300">⏳ รอบบัญชี (Circle):</span>
-      <select id="dash-cycle-select" onchange="renderDashboard()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-sm font-medium outline-none text-white"></select>
-    </div>
-
-    <div id="dash-wallets" class="flex flex-wrap gap-3"></div>
-
-    <details class="card-panel p-4 text-sm">
-      <summary class="font-semibold text-slate-200 cursor-pointer">⚖️ คาลิเบรทเงินจริงทุกกระเป๋า (Multi-Wallet Sync)</summary>
-      <div class="mt-3 space-y-3">
-        <p class="text-xs text-slate-400">ใส่ยอดเงินจริงในบัญชีปัจจุบัน ระบบจะปรับยอดอัตโนมัติให้ตรงเป๊ะ:</p>
-        <div id="calibrate-inputs" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
-        <button onclick="saveCalibration()" class="px-4 py-2 bg-[#f9744b] text-white text-xs font-semibold rounded-xl transition-all">⚡ ปรับยอดจริงทันที</button>
-      </div>
-    </details>
-
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-      <div class="metric-card"><div class="text-xs text-slate-400">Net Wealth รวม</div><div class="text-xl font-bold text-white" id="m-net">฿0</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">Income รอบนี้</div><div class="text-xl font-bold text-[#2a9d8f]" id="m-inc">฿0</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">Expenses รอบนี้</div><div class="text-xl font-bold text-[#f9744b]" id="m-exp">฿0</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">Savings สุทธิ</div><div class="text-xl font-bold text-[#457b9d]" id="m-sav">฿0</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">Investments</div><div class="text-xl font-bold text-[#e9c46a]" id="m-inv">฿0</div></div>
-    </div>
-
-    <div class="card-panel p-5 space-y-3">
-      <h3 class="text-sm font-bold text-white">🛡️ Smart Budget Tracker</h3>
-      <div id="budget-progress-container" class="space-y-3"></div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="card-panel p-4">
-        <h4 class="text-xs font-bold text-slate-400 mb-2">สัดส่วนรายจ่าย (Expense Pie)</h4>
-        <div id="chart-pie" style="height: 320px;"></div>
-      </div>
-      <div class="card-panel p-4">
-        <h4 class="text-xs font-bold text-slate-400 mb-2">รายจ่ายหมวดหมู่ย่อย (Top Sub-categories)</h4>
-        <div id="chart-subcat" style="height: 320px;"></div>
-      </div>
-    </div>
-
-    <div class="card-panel p-4">
-      <h4 class="text-xs font-bold text-slate-400 mb-2">🪐 Deep Dive Infographic (โครงสร้างต้นไม้ Treemap)</h4>
-      <div id="chart-treemap" style="height: 400px;"></div>
-    </div>
-  </div>
-
-  <!-- ============================================================== -->
-  <!-- TAB 3: RECEIVABLES -->
-  <!-- ============================================================== -->
-  <div id="tab-debt" class="tab-content hidden space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="metric-card">
-        <div class="text-xs text-slate-400">⏳ ยอดเงินที่รอคืน</div>
-        <div class="text-2xl font-bold text-[#f9744b]" id="lbl-debt-pending">฿0.00</div>
-      </div>
-      <div class="metric-card">
-        <div class="text-xs text-slate-400">✅ ได้รับคืนมาแล้ว</div>
-        <div class="text-2xl font-bold text-[#2a9d8f]" id="lbl-debt-paid">฿0.00</div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="card-panel p-5">
-        <h3 class="text-sm font-bold text-white mb-3">➕ เพิ่มรายการคนติดเงิน</h3>
-        <form onsubmit="handleAddDebt(event)" class="space-y-3">
-          <input type="text" id="debt-who" required placeholder="ชื่อคนติดเงิน (เช่น แฟน, เพื่อน)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-          <input type="text" id="debt-desc" required placeholder="รายการ (เช่น ค่าข้าว, ชาบู)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-          <input type="number" step="0.01" min="1" id="debt-amt" required placeholder="จำนวนเงิน (บาท)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs font-bold text-white outline-none">
-          <select id="debt-wallet" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white outline-none"></select>
-          <button type="submit" class="w-full bg-[#f9744b] text-white text-xs font-semibold py-2.5 rounded-xl transition-all">💾 บันทึกคนติดเงิน (ตัดเงินทดจ่าย)</button>
-        </form>
-      </div>
-
-      <div class="card-panel p-5">
-        <h3 class="text-sm font-bold text-white mb-3">🎉 ยืนยันรับคืนเงินแล้ว</h3>
-        <div class="space-y-3">
-          <select id="debt-pending-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white outline-none"></select>
-          <select id="debt-return-wallet" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white outline-none"></select>
-          <button onclick="handlePayDebt()" class="w-full bg-[#2a9d8f] text-white text-xs font-semibold py-2.5 rounded-xl transition-all">✅ ยืนยันว่าคืนเงินแล้ว</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card-panel p-5 overflow-x-auto">
-      <h3 class="text-sm font-bold text-white mb-3">ประวัติรายการหารบิลทั้งหมด</h3>
-      <table class="w-full text-left text-xs border-collapse">
-        <thead>
-          <tr class="border-b border-slate-700 text-slate-400">
-            <th class="p-2">ID</th><th class="p-2">ชื่อ</th><th class="p-2">รายการ</th><th class="p-2">จำนวนเงิน</th><th class="p-2">กระเป๋า</th><th class="p-2">สถานะ</th>
-          </tr>
-        </thead>
-        <tbody id="debt-table-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ============================================================== -->
-  <!-- TAB 4: GOALS -->
-  <!-- ============================================================== -->
-  <div id="tab-goal" class="tab-content hidden space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="metric-card"><div class="text-xs text-slate-400">คลังเงินออมจริง</div><div class="text-xl font-bold text-[#457b9d]" id="lbl-goal-total">฿0.00</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">จัดสรรเข้าเป้าหมายแล้ว</div><div class="text-xl font-bold text-[#2a9d8f]" id="lbl-goal-alloc">฿0.00</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">ยังไม่จัดสรร</div><div class="text-xl font-bold text-slate-300" id="lbl-goal-rem">฿0.00</div></div>
-    </div>
-
-    <div id="goals-progress-list" class="space-y-4"></div>
-
-    <div class="card-panel p-5 max-w-lg">
-      <h3 class="text-sm font-bold text-white mb-3">➕ เพิ่มเป้าหมายออมเงินใหม่</h3>
-      <form onsubmit="handleAddGoal(event)" class="space-y-3">
-        <input type="text" id="g-name" required placeholder="ชื่อเป้าหมายพร้อมไอคอน (เช่น ✈️ GRE Fund)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-        <input type="number" step="100" min="1" id="g-target" required placeholder="จำนวนเงินเป้าหมาย (บาท)" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-        <input type="number" step="100" min="0" id="g-saved" value="0" placeholder="เงินเริ่มต้นสะสม" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-        <select id="g-priority" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white outline-none">
-          <option>🚀 ด่วนที่สุด (Critical)</option>
-          <option>🔥 สูง (High)</option>
-          <option selected>⭐ ปานกลาง (Medium)</option>
-          <option>🟢 ต่ำ (Low)</option>
-        </select>
-        <button type="submit" class="w-full bg-[#f9744b] text-white text-xs font-semibold py-2.5 rounded-xl transition-all">💾 บันทึกเป้าหมาย</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ============================================================== -->
-  <!-- TAB 5: LOAN SIMULATOR -->
-  <!-- ============================================================== -->
-  <div id="tab-loan" class="tab-content hidden space-y-6">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <div class="metric-card"><div class="text-xs text-slate-400">ยอดผ่อน/เดือน (EMI)</div><div class="text-xl font-bold text-[#f9744b]" id="loan-emi">฿0.00</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">เงินต้นคงเหลือ</div><div class="text-xl font-bold text-white" id="loan-principal">฿0.00</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">ดอกเบี้ยรวม</div><div class="text-xl font-bold text-amber-400" id="loan-interest">฿0.00</div></div>
-      <div class="metric-card"><div class="text-xs text-slate-400">ผ่อนแล้ว</div><div class="text-xl font-bold text-[#2a9d8f]" id="loan-progress">0/0 งวด</div></div>
-    </div>
-
-    <div class="card-panel p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <div>
-        <h4 class="text-sm font-bold text-white">ชำระค่างวดประจำเดือน</h4>
-        <p class="text-xs text-slate-400" id="loan-status-text">พร้อมชำระงวดถัดไป</p>
-      </div>
-      <button onclick="handlePayLoan()" id="btn-pay-loan" class="px-6 py-2.5 bg-[#f9744b] text-white text-xs font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-        💸 เช็คบิลจ่ายงวดเดือนนี้
-      </button>
-    </div>
-
-    <div class="card-panel p-5 overflow-x-auto max-h-96">
-      <h3 class="text-sm font-bold text-white mb-3">ตารางแจกแจงการผ่อนชำระ (Amortization Schedule)</h3>
-      <table class="w-full text-left text-xs border-collapse">
-        <thead>
-          <tr class="border-b border-slate-700 text-slate-400">
-            <th class="p-2">งวดที่</th><th class="p-2">ยอดผ่อน</th><th class="p-2">ตัดเงินต้น</th><th class="p-2">ดอกเบี้ย</th><th class="p-2">เงินต้นคงเหลือ</th>
-          </tr>
-        </thead>
-        <tbody id="loan-schedule-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- ============================================================== -->
-  <!-- TAB 6: SETTINGS & EDITORS (โหมดจัดการข้อมูลแบบเต็มรูปแบบ) -->
-  <!-- ============================================================== -->
-  <div id="tab-settings" class="tab-content hidden space-y-8">
+  <!-- พื้นที่แสดงผลหลัก (Main Content) -->
+  <main class="md:ml-64 p-4 md:p-8 max-w-7xl mx-auto">
     
-    <!-- 1. Wallets Editor -->
-    <div class="card-panel p-5 space-y-4">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">💳 Wallets Editor (จัดการกระเป๋าเงิน / ธนาคาร)</h3>
-          <p class="text-xs text-slate-400 mt-1">สามารถแก้ไขรายชื่อธนาคาร หรือเพิ่มธนาคารใหม่ลงระบบได้ทันที</p>
-        </div>
-        <button onclick="saveWalletsTable()" class="px-4 py-2 bg-[#2a9d8f] hover:bg-[#238276] text-white text-xs font-semibold rounded-xl flex items-center gap-1 transition-all">
-          💾 บันทึกรายชื่อกระเป๋าเงิน (Save Wallets)
+    <!-- Top Bar -->
+    <header class="flex justify-between items-center mb-8 pt-2">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-slate-800 dark:text-white">Overview</h2>
+        <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400">รอบบัญชี: October 2026</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- ปุ่มสลับโหมด Dark/Light -->
+        <button id="theme-toggle" class="p-2.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-all text-slate-500 dark:text-slate-300">
+          <span id="theme-icon">☀️</span>
         </button>
       </div>
+    </header>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 overflow-x-auto">
-          <table class="w-full text-left text-xs border-collapse table-editor border border-slate-700 rounded-xl overflow-hidden">
-            <thead class="bg-slate-800 text-slate-300">
-              <tr>
-                <th class="p-2.5 w-16">#</th>
-                <th class="p-2.5">ชื่อกระเป๋า</th>
-                <th class="p-2.5 w-16 text-center">จัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="wallets-editor-body"></tbody>
-          </table>
-          <button onclick="addWalletRow()" class="mt-2 text-xs text-emerald-400 font-medium hover:underline flex items-center gap-1">
-            ➕ เพิ่มแถวใหม่ (Add Wallet)
-          </button>
-        </div>
-
-        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 h-fit space-y-3">
-          <h4 class="text-xs font-bold text-white flex items-center gap-1">➕ เพิ่มธนาคารด่วน</h4>
-          <input type="text" id="quick-wallet-input" placeholder="เช่น 💜 SCB, 💚 KBank, 💵 เงินสด" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white outline-none">
-          <button onclick="addQuickWalletAction()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-semibold rounded-lg text-white transition-all">
-            เพิ่มเข้าแอปทันที
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. Categories Editor -->
-    <div class="card-panel p-5 space-y-4">
-      <div class="flex justify-between items-center">
-        <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">📁 Categories Editor (จัดการหมวดหมู่)</h3>
-          <p class="text-xs text-slate-400 mt-1">กำหนดประเภท หมวดหมู่หลัก และหมวดหมู่ย่อย เพื่อใช้ในตัวเลือก Dropdown</p>
-        </div>
-        <button onclick="saveCategoriesTable()" class="px-4 py-2 bg-[#2a9d8f] hover:bg-[#238276] text-white text-xs font-semibold rounded-xl flex items-center gap-1 transition-all">
-          💾 บันทึกหมวดหมู่ (Save Categories)
-        </button>
-      </div>
-
-      <div class="overflow-x-auto max-h-96">
-        <table class="w-full text-left text-xs border-collapse table-editor border border-slate-700 rounded-xl overflow-hidden">
-          <thead class="bg-slate-800 text-slate-300 sticky top-0 z-10">
-            <tr>
-              <th class="p-2.5 w-40">ประเภท</th>
-              <th class="p-2.5">หมวดหมู่หลัก</th>
-              <th class="p-2.5">หมวดหมู่ย่อย</th>
-              <th class="p-2.5 w-16 text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="categories-editor-body"></tbody>
-        </table>
-      </div>
-      <button onclick="addCategoryRow()" class="text-xs text-emerald-400 font-medium hover:underline flex items-center gap-1">
-        ➕ เพิ่มแถวหมวดหมู่ใหม่ (Add Category)
-      </button>
-    </div>
-
-    <!-- 3. Raw Data Editor & Explorer -->
-    <div class="card-panel p-5 space-y-4">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">🛠️ ตารางแก้ไขข้อมูลดิบ (Full Editor - บันทึกลงคลาวด์)</h3>
-          <p class="text-xs text-slate-400 mt-1">คลิกที่ช่องเพื่อแก้ไขข้อมูลได้โดยตรง หรือกดลบแถวที่ไม่ต้องการออก</p>
-        </div>
-        <button onclick="saveRawDataTable()" class="px-4 py-2 bg-[#f9744b] hover:bg-[#e2643c] text-white text-xs font-semibold rounded-xl flex items-center gap-1 transition-all shadow-md">
-          💾 บันทึกข้อมูลทั้งหมดลงคลาวด์ (Save Data to Cloud)
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <input type="text" id="raw-search" oninput="renderRawEditorTable()" placeholder="🔍 ค้นหารายละเอียด / หมวดหมู่..." class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-        <select id="raw-type" onchange="renderRawEditorTable()" class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none">
-          <option value="">📌 กรองประเภท: ทั้งหมด</option>
-          <option value="รายจ่าย">รายจ่าย</option>
-          <option value="รายรับ">รายรับ</option>
-          <option value="เงินออม">เงินออม</option>
-          <option value="โอนย้ายกระเป๋า">โอนย้ายกระเป๋า</option>
-        </select>
-        <select id="raw-wallet" onchange="renderRawEditorTable()" class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none"></select>
-      </div>
-
-      <div class="overflow-x-auto max-h-[500px] border border-slate-700 rounded-xl">
-        <table class="w-full text-left text-xs border-collapse table-editor">
-          <thead class="bg-slate-800 text-slate-300 sticky top-0 z-10">
-            <tr>
-              <th class="p-2.5 w-14">#</th>
-              <th class="p-2.5 w-48">วันที่และเวลา (YYYY-MM-DD HH:MM:SS)</th>
-              <th class="p-2.5 w-32">ประเภท</th>
-              <th class="p-2.5 w-48">หมวดหมู่</th>
-              <th class="p-2.5 w-32">จำนวนเงิน (THB)</th>
-              <th class="p-2.5">รายละเอียด (Note)</th>
-              <th class="p-2.5 w-40">กระเป๋าเงิน</th>
-              <th class="p-2.5 w-16 text-center">ลบ</th>
-            </tr>
-          </thead>
-          <tbody id="raw-editor-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- JAVASCRIPT LOGIC ENGINE -->
-  <script>
-    // ⚙️ URL ของ Web App บน Google Apps Script
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyM0iUfIGDhN_UTZNCBEelrmSQ5Prz4L9b8gF9wQ-93wkPbKo-bdGprqBcttseH3bDSmw/exec"; 
-
-    let DB = { transactions: [], quickAdds: [], categories: [], loans: [], cycles: [], receivables: [], goals: [], wallets: [], budgets: [] };
-    const PALETTE = ["#2a9d8f", "#f4a261", "#457b9d", "#e9c46a", "#8ab17d", "#e76f51", "#f9744b", "#124d54", "#d62828"];
-
-    function cleanNum(val) {
-      if (val === undefined || val === null || val === '') return 0;
-      const cleaned = String(val).replace(/,/g, '').trim();
-      const num = parseFloat(cleaned);
-      return isNaN(num) ? 0 : num;
-    }
-
-    function parseSafeDate(dateStr) {
-      if (!dateStr) return null;
-      const s = String(dateStr).trim().replace(' ', 'T');
-      const d = new Date(s);
-      return isNaN(d.getTime()) ? new Date(0) : d;
-    }
-
-    // 1. Data Fetching
-    async function fetchAllData() {
-      showLoading(true);
-      try {
-        const res = await fetch(SCRIPT_URL);
-        const json = await res.json();
-        if (json.status === "success") {
-          DB = json.data;
-          initApp();
-        }
-      } catch (err) {
-        console.error("Fetch Error:", err);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function initApp() {
-      resetDateTime();
-      populateDropdowns();
-      renderQuickAdds();
-      renderDashboard();
-      renderReceivables();
-      renderGoals();
-      renderLoanSimulator();
-      renderAllEditors();
-    }
-
-    function switchTab(tabId, btnElement) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).classList.remove('hidden');
-      if (btnElement) btnElement.classList.add('active');
-      if (tabId === 'tab-dash') setTimeout(renderDashboardCharts, 100);
-      if (tabId === 'tab-settings') renderAllEditors();
-    }
-
-    function getWalletList() {
-      const set = new Set();
-      if (DB.wallets && DB.wallets.length > 1) {
-        DB.wallets.slice(1).forEach(r => {
-          if (r[0] && String(r[0]).trim()) set.add(String(r[0]).trim());
-        });
-      }
-      if (DB.transactions && DB.transactions.length > 1) {
-        DB.transactions.slice(1).forEach(r => {
-          if (r[5] && String(r[5]).trim()) set.add(String(r[5]).trim());
-        });
-      }
-      const list = Array.from(set);
-      return list.length > 0 ? list : ["🏦 กรุงไทย", "📱 TrueMoney Wallet", "🌸 ออมสิน"];
-    }
-
-    function getCategoriesMap() {
-      const map = { 'รายจ่าย': {}, 'รายรับ': {} };
-      if (!DB.categories) return map;
-      DB.categories.slice(1).forEach(r => {
-        const rawType = String(r[0] || '').trim();
-        const main = String(r[1] || '').trim();
-        const sub = String(r[2] || '').trim();
-        if (!rawType || !main) return;
-        const key = rawType.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
-        if (!map[key][main]) map[key][main] = [];
-        if (sub && sub !== "" && !map[key][main].includes(sub)) map[key][main].push(sub);
-      });
-      return map;
-    }
-
-    function populateDropdowns() {
-      const wallets = getWalletList();
-      const wSelects = ['tx-wallet', 'tx-from', 'tx-to', 'debt-wallet', 'debt-return-wallet', 'raw-wallet'];
-      wSelects.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.innerHTML = id === 'raw-wallet' ? '<option value="">💳 ทุกกระเป๋า</option>' : '';
-          wallets.forEach(w => el.innerHTML += `<option value="${w}">${w}</option>`);
-        }
-      });
-
-      renderTxFormFields();
-      
-      const cycleSelect = document.getElementById('dash-cycle-select');
-      cycleSelect.innerHTML = '<option value="ALL">🌟 แสดงข้อมูลทั้งหมด (All Time)</option>';
-      if(DB.cycles && DB.cycles.length > 1){
-        DB.cycles.slice(1).reverse().forEach(r => {
-          cycleSelect.innerHTML += `<option value="${r[0]}">${r[3] === 'ACTIVE' ? '🟢 ' : '📅 '} ${r[0]}</option>`;
-        });
-      }
-    }
-
-    function renderTxFormFields() {
-      const type = document.getElementById('tx-type').value;
-      document.getElementById('field-transfer').classList.toggle('hidden', type !== 'โอนย้ายกระเป๋า');
-      document.getElementById('field-savings').classList.toggle('hidden', type !== 'เงินออม');
-      document.getElementById('field-cats').classList.toggle('hidden', type === 'โอนย้ายกระเป๋า' || type === 'เงินออม');
-      document.getElementById('field-wallet').classList.toggle('hidden', type === 'โอนย้ายกระเป๋า');
-      
-      if (type === 'เงินออม') {
-        renderSavingsGoals();
-      } else if (type === 'รายจ่าย' || type === 'รายรับ') {
-        const mainCatSelect = document.getElementById('tx-cat');
-        mainCatSelect.innerHTML = '';
-        const catMap = getCategoriesMap();
-        const targetKey = type.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
-        const cats = Object.keys(catMap[targetKey] || {});
-        
-        if (cats.length === 0) {
-          ['อาหาร/เครื่องดื่ม', 'ค่าเดินทาง', 'ทั่วไป'].forEach(c => mainCatSelect.innerHTML += `<option value="${c}">${c}</option>`);
-        } else {
-          cats.forEach(c => mainCatSelect.innerHTML += `<option value="${c}">${c}</option>`);
-        }
-        renderSubCats();
-      }
-    }
-
-    function renderSubCats() {
-      const type = document.getElementById('tx-type').value;
-      const targetKey = type.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
-      const mainCat = document.getElementById('tx-cat').value;
-      const subSelect = document.getElementById('tx-subcat');
-      subSelect.innerHTML = '<option value="ทั่วไป">ทั่วไป</option>';
-      const catMap = getCategoriesMap();
-      const subs = (catMap[targetKey] && catMap[targetKey][mainCat]) || [];
-      subs.forEach(s => subSelect.innerHTML += `<option value="${s}">${s}</option>`);
-    }
-
-    function renderSavingsGoals() {
-      const select = document.getElementById('tx-goal-slot');
-      select.innerHTML = '<option value="📦 คลังออมทั่วไป">📦 คลังออมทั่วไป</option>';
-      if (!DB.goals) return;
-      DB.goals.slice(1).forEach(r => {
-        const saved = cleanNum(r[3]);
-        select.innerHTML += `<option value="${r[1]}">${r[0] || '🎯'} ${r[1]} (สะสม: ฿${saved.toLocaleString()})</option>`;
-      });
-    }
-
-    function toggleSavingsSplitMode() {
-      const mode = document.querySelector('input[name="sav_alloc_mode"]:checked').value;
-      document.getElementById('box-goal-single').classList.toggle('hidden', mode === 'split');
-      const splitBox = document.getElementById('box-goal-split');
-      splitBox.classList.toggle('hidden', mode !== 'split');
-
-      if (mode === 'split') {
-        splitBox.innerHTML = '';
-        const goals = (DB.goals && DB.goals.length > 1) ? DB.goals.slice(1) : [['🎯', 'เป้าหมาย 1']];
-        const count = goals.length || 1;
-        const initialPct = (100 / count).toFixed(1);
-        goals.forEach((g, i) => {
-          splitBox.innerHTML += `
-            <div class="bg-slate-900 p-2.5 rounded-lg border border-slate-700">
-              <div class="flex justify-between text-xs font-semibold mb-1">
-                <span>${g[1]}</span>
-                <span id="split-lbl-${i}">฿0 (0%)</span>
-              </div>
-              <input type="range" min="0" max="100" value="${initialPct}" class="w-full split-range accent-[#f9744b]" data-idx="${i}" data-goal="${g[1]}" oninput="updateSplitAmounts()">
-            </div>
-          `;
-        });
-        updateSplitAmounts();
-      }
-    }
-
-    function updateSplitAmounts() {
-      const totalAmt = cleanNum(document.getElementById('tx-amount').value);
-      const ranges = document.querySelectorAll('.split-range');
-      ranges.forEach(r => {
-        const pct = parseFloat(r.value);
-        const amt = totalAmt * (pct / 100);
-        const idx = r.dataset.idx;
-        const lbl = document.getElementById(`split-lbl-${idx}`);
-        if (lbl) lbl.innerText = `฿${amt.toLocaleString()} (${pct.toFixed(0)}%)`;
-      });
-    }
-
-    // 2. Dashboard
-    function renderDashboard() {
-      const txRows = (DB.transactions && DB.transactions.length > 1) ? DB.transactions.slice(1) : [];
-      const selectedCycle = document.getElementById('dash-cycle-select').value;
-
-      let cumulativeTx = txRows;
-      let filteredTx = txRows;
-      let activeCarry = 0;
-
-      if (selectedCycle !== "ALL" && DB.cycles) {
-        const cycle = DB.cycles.slice(1).find(c => c[0] === selectedCycle);
-        if (cycle) {
-          activeCarry = parseFloat(cycle[4]) || 0;
-          const start = parseSafeDate(cycle[1]);
-          const end = cycle[2] ? parseSafeDate(cycle[2]) : new Date(8640000000000000);
-          
-          filteredTx = txRows.filter(r => {
-            const d = parseSafeDate(r[0]);
-            return d >= start && d <= end;
-          });
-          cumulativeTx = txRows.filter(r => {
-             const d = parseSafeDate(r[0]);
-             return d <= end;
-          });
-        }
-      }
-
-      const wallets = getWalletList();
-      const balances = {};
-      wallets.forEach(w => balances[w] = 0);
-
-      let totalSavings = 0;
-      cumulativeTx.forEach(r => {
-         const type = String(r[1]).trim();
-         const amt = cleanNum(r[3]);
-         if (type === "เงินออม") totalSavings += amt;
-         if (type.includes("ถอนเงินออม")) totalSavings -= amt;
-      });
-
-      cumulativeTx.forEach(r => {
-        const type = String(r[1]).trim();
-        const cat = String(r[2]).trim();
-        const amt = cleanNum(r[3]);
-        const w = String(r[5]).trim();
-
-        if (type.includes("โอนย้าย")) {
-          if (balances[w] !== undefined) balances[w] -= amt;
-          wallets.forEach(toW => {
-            if (cat.toLowerCase().includes(toW.toLowerCase())) balances[toW] = (balances[toW] || 0) + amt;
-          });
-        } else if (
-          type.includes("รายรับ") || 
-          type.includes("ถอนเงินออม") || 
-          type.includes("กู้เงินออม") || 
-          type.includes("รับคืนเงินทดจ่าย") || 
-          type.includes("ปรับยอดเพิ่ม")
-        ) {
-          if (balances[w] !== undefined) balances[w] += amt;
-        } else if (
-          type.includes("รายจ่าย") || 
-          type.includes("เงินลงทุน") || 
-          (type.includes("เงินออม") && !type.includes("ถอน") && !type.includes("กู้")) || 
-          type.includes("คืนเงินกู้ออม") || 
-          (type.includes("เงินทดจ่าย") && !type.includes("รับคืน")) || 
-          type.includes("ปรับยอดลด")
-        ) {
-          if (balances[w] !== undefined) balances[w] -= amt;
-        }
-      });
-
-      const primaryWallet = wallets[0] || "🏦 กรุงไทย"; 
-      balances[primaryWallet] += activeCarry;
-
-      wallets.forEach(w => {
-         if (w.includes("ออมสิน")) {
-            let adjIn = 0, adjOut = 0;
-            cumulativeTx.filter(r => r[5] === w).forEach(r => {
-               const t = String(r[1]);
-               if (t.includes("ปรับยอดเพิ่ม")) adjIn += cleanNum(r[3]);
-               if (t.includes("ปรับยอดลด")) adjOut += cleanNum(r[3]);
-            });
-            balances[w] = totalSavings + adjIn - adjOut;
-         }
-      });
-
-      const wCardContainer = document.getElementById('dash-wallets');
-      const calibContainer = document.getElementById('calibrate-inputs');
-      wCardContainer.innerHTML = '';
-      calibContainer.innerHTML = '';
-
-      let netWealth = 0;
-      wallets.forEach((w, i) => {
-        const bal = balances[w] || 0;
-        netWealth += bal;
-        const color = PALETTE[i % PALETTE.length];
-        
-        if (w && w !== "") {
-           wCardContainer.innerHTML += `
-             <div class="flex-1 min-w-[150px] p-3 rounded-xl card-panel" style="border-left: 4px solid ${color}">
-               <span class="text-xs text-slate-400 font-medium">${w}</span>
-               <div class="text-lg font-bold" style="color:${color}">฿${bal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-             </div>
-           `;
-           calibContainer.innerHTML += `
-             <div>
-               <label class="block text-[10px] text-slate-400">${w}</label>
-               <input type="number" step="0.01" data-wallet="${w}" data-curr="${bal}" placeholder="฿${bal.toFixed(0)}" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs calib-input text-white outline-none">
-             </div>
-           `;
-        }
-      });
-
-      let inc = 0, exp = 0, savFlow = 0, inv = 0;
-      filteredTx.forEach(r => {
-        const type = String(r[1]).trim();
-        const amt = cleanNum(r[3]);
-        if (type.includes("รายรับ") && !type.includes("รับคืน")) inc += amt;
-        if (type.includes("รายจ่าย") && !type.includes("ปรับยอด") && !String(r[2]).includes("ฝากออม")) exp += amt;
-        if (type === "เงินออม") savFlow += amt;
-        if (type.includes("ถอนเงินออม")) savFlow -= amt;
-        if (type.includes("ลงทุน")) inv += amt;
-      });
-
-      document.getElementById('m-net').innerText = `฿${netWealth.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-      document.getElementById('m-inc').innerText = `฿${inc.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-      document.getElementById('m-exp').innerText = `฿${exp.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-      document.getElementById('m-sav').innerText = `฿${savFlow.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-      document.getElementById('m-inv').innerText = `฿${inv.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-
-      renderBudgetTracker(filteredTx);
-      renderDashboardCharts(filteredTx);
-    }
-
-    function renderBudgetTracker(txRows) {
-      const container = document.getElementById('budget-progress-container');
-      container.innerHTML = '';
-      if (!DB.budgets || DB.budgets.length <= 1) {
-        container.innerHTML = '<p class="text-xs text-slate-500">ยังไม่มีการตั้งค่างบประมาณ</p>';
-        return;
-      }
-
-      const spentMap = {};
-      txRows.filter(r => String(r[1]).includes("รายจ่าย")).forEach(r => {
-        const cat = String(r[2]).trim();
-        const amt = cleanNum(r[3]);
-        spentMap[cat] = (spentMap[cat] || 0) + amt;
-        const mainCat = cat.split(':')[0].trim();
-        spentMap[mainCat] = (spentMap[mainCat] || 0) + amt;
-      });
-
-      DB.budgets.slice(1).forEach(b => {
-        const name = b[0];
-        const budget = cleanNum(b[1]);
-        const spent = spentMap[name] || 0;
-        const pct = budget > 0 ? (spent / budget) * 100 : 0;
-        let color = "#2a9d8f";
-        if (pct > 80) color = "#f9744b";
-        if (pct >= 100) color = "#d62828";
-
-        container.innerHTML += `
+    <!-- Net Wealth Banner -->
+    <section class="mb-8">
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 p-6 md:p-8 border border-slate-700/50 shadow-xl shadow-slate-900/10">
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <div class="flex justify-between text-xs font-semibold mb-1">
-              <span>${name}</span>
-              <span style="color:${color}">฿${spent.toLocaleString()} / ฿${budget.toLocaleString()} (${pct.toFixed(0)}%)</span>
+            <p class="text-slate-400 text-sm font-medium mb-1">รวมเงินทั้งหมด (Net Wealth)</p>
+            <h3 class="text-4xl md:text-5xl font-bold text-white tracking-tight">฿5,881<span class="text-slate-500 text-2xl">.96</span></h3>
+          </div>
+          <div class="bg-white/10 backdrop-blur-md rounded-2xl p-4 flex gap-6 border border-white/10">
+            <div>
+              <p class="text-slate-400 text-xs mb-1">รายรับรอบนี้</p>
+              <p class="text-emerald-400 font-semibold">฿4,200.00</p>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-2">
-              <div class="h-2 rounded-full" style="width: ${Math.min(pct, 100)}%; background-color: ${color}"></div>
+            <div>
+              <p class="text-slate-400 text-xs mb-1">รายจ่ายรอบนี้</p>
+              <p class="text-brand-500 font-semibold">฿1,850.50</p>
             </div>
           </div>
-        `;
-      });
-    }
+        </div>
+        <!-- ตกแต่งแบคกราวด์ -->
+        <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-brand-500/20 blur-3xl rounded-full"></div>
+        <div class="absolute -left-10 -top-10 w-32 h-32 bg-emerald-500/10 blur-2xl rounded-full"></div>
+      </div>
+    </section>
 
-    function renderDashboardCharts(txList) {
-      const txRows = txList || ((DB.transactions && DB.transactions.length > 1) ? DB.transactions.slice(1) : []);
-      const expRows = txRows.filter(r => String(r[1]).includes("รายจ่าย"));
+    <!-- Wallets Row (เลื่อนแนวนอนได้บนมือถือ) -->
+    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200 mb-3">กระเป๋าเงินของคุณ (Wallets)</h3>
+    <section class="flex overflow-x-auto gap-4 pb-4 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+      
+      <!-- Wallet Card 1 -->
+      <div class="min-w-[160px] md:min-w-[200px] bg-white dark:bg-card-dark p-4 rounded-2xl border-l-4 border-l-emerald-500 border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm">🏦</span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">กรุงไทย</span>
+        </div>
+        <p class="text-xl font-bold text-slate-800 dark:text-white">฿4,100.23</p>
+      </div>
 
-      const catTotals = {}, subTotals = {}, treeData = [];
-      expRows.forEach(r => {
-        const fullCat = String(r[2]).trim();
-        const amt = cleanNum(r[3]);
-        const main = fullCat.split(':')[0].trim();
-        const sub = fullCat.includes(':') ? fullCat.split(':')[1].trim() : 'ทั่วไป';
-        const note = r[4] ? String(r[4]).trim() : 'ไม่ระบุ Note';
+      <!-- Wallet Card 2 -->
+      <div class="min-w-[160px] md:min-w-[200px] bg-white dark:bg-card-dark p-4 rounded-2xl border-l-4 border-l-amber-500 border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm">📱</span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">TrueMoney</span>
+        </div>
+        <p class="text-xl font-bold text-slate-800 dark:text-white">฿14.35</p>
+      </div>
 
-        catTotals[main] = (catTotals[main] || 0) + amt;
-        subTotals[sub] = (subTotals[sub] || 0) + amt;
-        treeData.push({ main, sub, note, amt });
-      });
+      <!-- Wallet Card 3 -->
+      <div class="min-w-[160px] md:min-w-[200px] bg-white dark:bg-card-dark p-4 rounded-2xl border-l-4 border-l-blue-400 border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-1 transition-transform">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm">🌸</span>
+          <span class="text-xs font-medium text-slate-500 dark:text-slate-400">ออมสิน</span>
+        </div>
+        <p class="text-xl font-bold text-slate-800 dark:text-white">฿1,078.29</p>
+      </div>
 
-      const pieValues = Object.values(catTotals);
-      const pieLabels = Object.keys(catTotals);
-      Plotly.newPlot('chart-pie', [{
-        values: pieValues.length ? pieValues : [1],
-        labels: pieLabels.length ? pieLabels : ['ไม่มีข้อมูล'],
-        type: 'pie',
-        hole: 0.7,
-        marker: { colors: PALETTE }
-      }], { margin: { t: 10, b: 10, l: 10, r: 10 }, showlegend: false, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, { responsive: true });
+    </section>
 
-      const barLabels = Object.keys(subTotals).slice(0, 8);
-      const barValues = barLabels.map(l => subTotals[l]);
-      Plotly.newPlot('chart-subcat', [{
-        x: barValues,
-        y: barLabels,
-        type: 'bar',
-        orientation: 'h',
-        marker: { color: '#f9744b' }
-      }], { margin: { t: 10, b: 20, l: 90, r: 10 }, yaxis: { autorange: 'reversed' }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent', font: { color: '#cbd5e1' } }, { responsive: true });
+    <!-- Placeholder สำหรับกราฟ (รอเชื่อมต่อข้อมูลจริง) -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+      <div class="bg-white dark:bg-card-dark h-64 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-slate-400 dark:text-slate-600 border-dashed">
+        <span class="text-3xl mb-2">📊</span>
+        <p class="text-sm font-medium">Expense Chart Placeholder</p>
+      </div>
+      <div class="bg-white dark:bg-card-dark h-64 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-center items-center text-slate-400 dark:text-slate-600 border-dashed">
+        <span class="text-3xl mb-2">🛡️</span>
+        <p class="text-sm font-medium">Budget Tracker Placeholder</p>
+      </div>
+    </section>
 
-      if (treeData.length > 0) {
-        Plotly.newPlot('chart-treemap', [{
-          type: "treemap",
-          labels: ["💸 รายจ่ายรวม", ...pieLabels, ...Object.keys(subTotals)],
-          parents: ["", ...pieLabels.map(() => "💸 รายจ่ายรวม"), ...Object.keys(subTotals).map(s => {
-            const found = treeData.find(t => t.sub === s);
-            return found ? found.main : "💸 รายจ่ายรวม";
-          })],
-          values: [
-            pieValues.reduce((a,b)=>a+b, 0),
-            ...pieValues,
-            ...Object.keys(subTotals).map(s => subTotals[s])
-          ]
-        }], { margin: { t: 10, b: 10, l: 10, r: 10 }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, { responsive: true });
-      }
-    }
+  </main>
 
-    // 3. Receivables
-    function renderReceivables() {
-      const rows = (DB.receivables && DB.receivables.length > 1) ? DB.receivables.slice(1) : [];
-      let pending = 0, paid = 0;
-      const select = document.getElementById('debt-pending-select');
-      const tbody = document.getElementById('debt-table-body');
-      select.innerHTML = '';
-      tbody.innerHTML = '';
+  <!-- Script สำหรับปุ่มสลับโหมด Dark/Light -->
+  <script>
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const htmlEl = document.documentElement;
 
-      rows.forEach((r, idx) => {
-        const amt = cleanNum(r[3]);
-        const status = String(r[6]);
-        if (status.includes('รอคืนเงิน')) {
-          pending += amt;
-          select.innerHTML += `<option value="${idx + 2}">#${r[0]} - ${r[1]} (${r[2]} ฿${amt.toLocaleString()})</option>`;
-        } else {
-          paid += amt;
-        }
-        tbody.innerHTML += `
-          <tr class="border-b border-slate-700/60">
-            <td class="p-2">${r[0]}</td><td class="p-2 font-medium">${r[1]}</td><td class="p-2">${r[2]}</td>
-            <td class="p-2 font-semibold">฿${amt.toLocaleString()}</td><td class="p-2">${r[4]}</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] ${status.includes('รอ') ? 'bg-amber-950 text-amber-300 border border-amber-800':'bg-emerald-950 text-emerald-300 border border-emerald-800'}">${status}</span></td>
-          </tr>
-        `;
-      });
-      document.getElementById('lbl-debt-pending').innerText = `฿${pending.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-      document.getElementById('lbl-debt-paid').innerText = `฿${paid.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    }
-
-    // 4. Goals
-    function renderGoals() {
-      const rows = (DB.goals && DB.goals.length > 1) ? DB.goals.slice(1) : [];
-      const container = document.getElementById('goals-progress-list');
-      container.innerHTML = '';
-      let alloc = 0;
-
-      let totalSavings = 0;
-      if (DB.transactions && DB.transactions.length > 1) {
-        DB.transactions.slice(1).forEach(r => {
-          const type = String(r[1]).trim();
-          const amt = cleanNum(r[3]);
-          if (type === "เงินออม") totalSavings += amt;
-          if (type.includes("ถอนเงินออม")) totalSavings -= amt;
-        });
-      }
-
-      rows.forEach(r => {
-        const name = r[1];
-        const target = cleanNum(r[2]) || 1;
-        const saved = cleanNum(r[3]);
-        alloc += saved;
-        const pct = Math.min((saved / target) * 100, 100);
-
-        container.innerHTML += `
-          <div class="card-panel p-4">
-            <div class="flex justify-between items-center mb-1">
-              <span class="font-bold text-xs text-white">${r[0] || '🎯'} ${name} <span class="text-[10px] font-normal px-2 py-0.5 bg-slate-800 text-slate-300 rounded border border-slate-700">${r[4]}</span></span>
-              <span class="text-xs font-semibold text-[#2a9d8f]">฿${saved.toLocaleString()} / ฿${target.toLocaleString()} (${pct.toFixed(0)}%)</span>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-2">
-              <div class="h-2 rounded-full bg-[#2a9d8f]" style="width: ${pct}%"></div>
-            </div>
-          </div>
-        `;
-      });
-
-      const remainingUnallocated = Math.max(0, totalSavings - alloc);
-      document.getElementById('lbl-goal-total').innerText = `฿${totalSavings.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-      document.getElementById('lbl-goal-alloc').innerText = `฿${alloc.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-      document.getElementById('lbl-goal-rem').innerText = `฿${remainingUnallocated.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-    }
-
-    // 5. Loan
-    function renderLoanSimulator() {
-      if (!DB.loans || DB.loans.length <= 1) return;
-      const loan = DB.loans[1];
-      const P = cleanNum(loan[0]) || 10000;
-      const annualR = cleanNum(loan[1]) || 15;
-      const n = parseInt(loan[2]) || 12;
-      const paidMonths = parseInt(loan[3]) || 0;
-      const lastMonthPaid = String(loan[4] || "").trim();
-
-      const r = (annualR / 100) / 12;
-      const emi = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-      const totalPayment = emi * n;
-      const totalInterest = totalPayment - P;
-
-      document.getElementById('loan-emi').innerText = `฿${emi.toFixed(2)}`;
-      document.getElementById('loan-principal').innerText = `฿${P.toLocaleString()}`;
-      document.getElementById('loan-interest').innerText = `฿${totalInterest.toFixed(2)}`;
-      document.getElementById('loan-progress').innerText = `${paidMonths}/${n} งวด`;
-
-      const nowMonth = getNowString().slice(0, 7);
-      const btnPay = document.getElementById('btn-pay-loan');
-      const statusText = document.getElementById('loan-status-text');
-
-      if (paidMonths >= n) {
-        btnPay.disabled = true;
-        btnPay.innerText = "🎉 ผ่อนชำระครบสัญญาแล้ว";
-        statusText.innerText = "สัญญาเงินกู้ฉบับนี้เสร็จสิ้นเรียบร้อยแล้ว";
-      } else if (lastMonthPaid === nowMonth) {
-        btnPay.disabled = true;
-        btnPay.innerText = "🔒 จ่ายงวดของเดือนนี้แล้ว";
-        statusText.innerText = `งวดที่ ${paidMonths} ถูกตัดบัญชีไปแล้ว (ระบบจะเปิดให้จ่ายใหม่อัตโนมัติเมื่อขึ้นเดือนใหม่)`;
+    themeToggleBtn.addEventListener('click', () => {
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        themeIcon.textContent = '🌙';
       } else {
-        btnPay.disabled = false;
-        btnPay.innerText = "💸 เช็คบิลจ่ายงวดเดือนนี้";
-        statusText.innerText = `พร้อมชำระงวดที่ ${paidMonths + 1}/${n}`;
+        htmlEl.classList.add('dark');
+        themeIcon.textContent = '☀️';
       }
-
-      let balance = P;
-      const tbody = document.getElementById('loan-schedule-body');
-      tbody.innerHTML = '';
-      for (let m = 1; m <= n; m++) {
-        const intPmt = balance * r;
-        const prinPmt = emi - intPmt;
-        balance -= prinPmt;
-        const isPaid = m <= paidMonths;
-        tbody.innerHTML += `
-          <tr class="border-b border-slate-700/60 ${isPaid ? 'bg-emerald-950/40 text-emerald-300 font-medium' : ''}">
-            <td class="p-2">${m}</td><td class="p-2">฿${emi.toFixed(2)}</td><td class="p-2">฿${prinPmt.toFixed(2)}</td>
-            <td class="p-2">฿${intPmt.toFixed(2)}</td><td class="p-2">฿${Math.max(0, balance).toFixed(2)}</td>
-          </tr>
-        `;
-      }
-    }
-
-    // ==============================================================
-    // 🛠️ 6. EDITORS MANAGEMENT LOGIC (จัดการหมวดหมู่, กระเป๋า, ข้อมูลดิบ)
-    // ==============================================================
-    function renderAllEditors() {
-      renderWalletsEditor();
-      renderCategoriesEditor();
-      renderRawEditorTable();
-    }
-
-    // --- Wallets Editor ---
-    function renderWalletsEditor() {
-      const tbody = document.getElementById('wallets-editor-body');
-      tbody.innerHTML = '';
-      const rows = (DB.wallets && DB.wallets.length > 1) ? DB.wallets.slice(1) : [["🏦 กรุงไทย"], ["📱 TrueMoney Wallet"], ["🌸 ออมสิน"]];
-      rows.forEach((r, idx) => {
-        tbody.innerHTML += `
-          <tr class="border-b border-slate-700">
-            <td class="p-2 text-slate-400">${idx + 1}</td>
-            <td class="p-1"><input type="text" value="${r[0] || ''}" class="wallet-name-input"></td>
-            <td class="p-1 text-center"><button onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-300 font-bold">🗑️</button></td>
-          </tr>
-        `;
-      });
-    }
-
-    function addWalletRow() {
-      const tbody = document.getElementById('wallets-editor-body');
-      const count = tbody.children.length + 1;
-      tbody.innerHTML += `
-        <tr class="border-b border-slate-700 bg-slate-800/40">
-          <td class="p-2 text-slate-400">${count}</td>
-          <td class="p-1"><input type="text" placeholder="ระบุชื่อกระเป๋า..." class="wallet-name-input"></td>
-          <td class="p-1 text-center"><button onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-300 font-bold">🗑️</button></td>
-        </tr>
-      `;
-    }
-
-    async function addQuickWalletAction() {
-      const inp = document.getElementById('quick-wallet-input');
-      const val = inp.value.trim();
-      if (!val) return;
-      
-      const currentWallets = (DB.wallets && DB.wallets.length > 0) ? DB.wallets.slice(0) : [["ชื่อกระเป๋า"]];
-      currentWallets.push([val]);
-      
-      inp.value = '';
-      await sendApi({ action: "save_table", sheetName: "Wallets", rows: currentWallets });
-      await fetchAllData();
-    }
-
-    async function saveWalletsTable() {
-      const inputs = document.querySelectorAll('.wallet-name-input');
-      const newRows = [["ชื่อกระเป๋า"]];
-      inputs.forEach(inp => {
-        const v = inp.value.trim();
-        if (v) newRows.push([v]);
-      });
-
-      await sendApi({ action: "save_table", sheetName: "Wallets", rows: newRows });
-      alert("บันทึกรายชื่อกระเป๋าเงินเรียบร้อย! ✨");
-      await fetchAllData();
-    }
-
-    // --- Categories Editor ---
-    function renderCategoriesEditor() {
-      const tbody = document.getElementById('categories-editor-body');
-      tbody.innerHTML = '';
-      const rows = (DB.categories && DB.categories.length > 1) ? DB.categories.slice(1) : [];
-      rows.forEach((r, idx) => {
-        tbody.innerHTML += `
-          <tr class="border-b border-slate-700">
-            <td class="p-1">
-              <select class="cat-type-select bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-                <option value="รายจ่าย" ${r[0]==='รายจ่าย'?'selected':''}>💸 รายจ่าย</option>
-                <option value="รายรับ" ${r[0]==='รายรับ'?'selected':''}>📥 รายรับ</option>
-              </select>
-            </td>
-            <td class="p-1"><input type="text" value="${r[1] || ''}" class="cat-main-input"></td>
-            <td class="p-1"><input type="text" value="${r[2] || ''}" class="cat-sub-input"></td>
-            <td class="p-1 text-center"><button onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-300 font-bold">🗑️</button></td>
-          </tr>
-        `;
-      });
-    }
-
-    function addCategoryRow() {
-      const tbody = document.getElementById('categories-editor-body');
-      tbody.innerHTML += `
-        <tr class="border-b border-slate-700 bg-slate-800/40">
-          <td class="p-1">
-            <select class="cat-type-select bg-slate-900 border border-slate-700 rounded p-1 text-xs">
-              <option value="รายจ่าย">💸 รายจ่าย</option>
-              <option value="รายรับ">📥 รายรับ</option>
-            </select>
-          </td>
-          <td class="p-1"><input type="text" placeholder="หมวดหมู่หลัก..." class="cat-main-input"></td>
-          <td class="p-1"><input type="text" placeholder="หมวดหมู่ย่อย..." class="cat-sub-input"></td>
-          <td class="p-1 text-center"><button onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-300 font-bold">🗑️</button></td>
-        </tr>
-      `;
-    }
-
-    async function saveCategoriesTable() {
-      const trs = document.querySelectorAll('#categories-editor-body tr');
-      const newRows = [["ประเภท", "หมวดหมู่หลัก", "หมวดหมู่ย่อย"]];
-      trs.forEach(tr => {
-        const type = tr.querySelector('.cat-type-select').value;
-        const main = tr.querySelector('.cat-main-input').value.trim();
-        const sub = tr.querySelector('.cat-sub-input').value.trim();
-        if (main) newRows.push([type, main, sub]);
-      });
-
-      await sendApi({ action: "save_table", sheetName: "Categories", rows: newRows });
-      alert("บันทึกหมวดหมู่เรียบร้อย! ✨");
-      await fetchAllData();
-    }
-
-    // --- Raw Data Editor (Full Cloud Editor) ---
-    function renderRawEditorTable() {
-      const tbody = document.getElementById('raw-editor-body');
-      tbody.innerHTML = '';
-      if (!DB.transactions || DB.transactions.length <= 1) return;
-
-      const q = document.getElementById('raw-search').value.toLowerCase();
-      const filterType = document.getElementById('raw-type').value;
-      const filterWallet = document.getElementById('raw-wallet').value;
-      const wallets = getWalletList();
-
-      const typeOptions = ["รายรับ", "รายจ่าย", "เงินออม", "ถอนเงินออม", "กู้เงินออม", "คืนเงินกู้ออม", "เงินลงทุน", "โอนย้ายกระเป๋า", "🤝 เงินทดจ่าย", "🤝 รับคืนเงินทดจ่าย", "⚖️ ปรับยอดเพิ่ม", "⚖️ ปรับยอดลด"];
-
-      // ดึงทุกแถวโดยอิง Index เดิมเพื่อไม่ให้ลำดับเสีย
-      const dataRows = DB.transactions.slice(1);
-      dataRows.forEach((r, idx) => {
-        const realIdx = idx + 1; // อิง index จริงใน sheet
-        if (q && !String(r[2]).toLowerCase().includes(q) && !String(r[4]).toLowerCase().includes(q)) return;
-        if (filterType && !String(r[1]).includes(filterType)) return;
-        if (filterWallet && r[5] !== filterWallet) return;
-
-        let walletOptionsHtml = '';
-        wallets.forEach(w => {
-          walletOptionsHtml += `<option value="${w}" ${r[5]===w?'selected':''}>${w}</option>`;
-        });
-
-        let typeOptionsHtml = '';
-        typeOptions.forEach(t => {
-          typeOptionsHtml += `<option value="${t}" ${String(r[1]).includes(t)?'selected':''}>${t}</option>`;
-        });
-
-        tbody.innerHTML += `
-          <tr class="border-b border-slate-700/60 raw-row" data-row-idx="${realIdx}">
-            <td class="p-2 text-slate-500 font-mono text-[10px]">${realIdx}</td>
-            <td class="p-1"><input type="text" value="${r[0] || ''}" class="raw-date font-mono text-[11px]"></td>
-            <td class="p-1"><select class="raw-type text-[11px]">${typeOptionsHtml}</select></td>
-            <td class="p-1"><input type="text" value="${r[2] || ''}" class="raw-cat"></td>
-            <td class="p-1"><input type="number" step="0.01" value="${cleanNum(r[3])}" class="raw-amt font-semibold text-emerald-400"></td>
-            <td class="p-1"><input type="text" value="${r[4] || ''}" class="raw-note"></td>
-            <td class="p-1"><select class="raw-wallet text-[11px]">${walletOptionsHtml}</select></td>
-            <td class="p-1 text-center"><button onclick="this.closest('tr').remove()" class="text-rose-400 hover:text-rose-300 font-bold">🗑️</button></td>
-          </tr>
-        `;
-      });
-    }
-
-    async function saveRawDataTable() {
-      const trs = document.querySelectorAll('#raw-editor-body tr');
-      const newRows = [["วันที่", "ประเภท", "หมวดหมู่", "จำนวนเงิน", "รายละเอียด", "กระเป๋า"]];
-      
-      trs.forEach(tr => {
-        const d = tr.querySelector('.raw-date').value.trim();
-        const t = tr.querySelector('.raw-type').value;
-        const c = tr.querySelector('.raw-cat').value.trim();
-        const a = cleanNum(tr.querySelector('.raw-amt').value);
-        const n = tr.querySelector('.raw-note').value.trim();
-        const w = tr.querySelector('.raw-wallet').value;
-        if (d) newRows.push([d, t, c, a, n, w]);
-      });
-
-      await sendApi({ action: "save_table", sheetName: "ชีต1", rows: newRows });
-      alert("บันทึกข้อมูลดิบทั้งหมดลงคลาวด์เรียบร้อยครับ! ✨");
-      await fetchAllData();
-    }
-
-    // 7. Handlers & Actions
-    async function handleTransactionSubmit(e) {
-      e.preventDefault();
-      const type = document.getElementById('tx-type').value;
-      const amount = cleanNum(document.getElementById('tx-amount').value);
-      const note = document.getElementById('tx-note').value;
-      const timeVal = document.getElementById('tx-time').value.length === 5 ? `${document.getElementById('tx-time').value}:00` : document.getElementById('tx-time').value;
-      const date = `${document.getElementById('tx-date').value} ${timeVal}`;
-      
-      let finalCategory = "ทั่วไป";
-      let finalWallet = document.getElementById('tx-wallet').value;
-      let finalType = type;
-      let goalUpdates = [];
-
-      if (type === 'โอนย้ายกระเป๋า') {
-        const fromW = document.getElementById('tx-from').value;
-        const toW = document.getElementById('tx-to').value;
-        finalWallet = fromW;
-        finalCategory = `โอนย้ายระหว่างกระเป๋า: เข้า ${toW}`;
-      } else if (type === 'เงินออม') {
-        const action = document.querySelector('input[name="sav_action"]:checked').value;
-        const mode = document.querySelector('input[name="sav_alloc_mode"]:checked').value;
-        finalType = action === 'เบิกออกมาใช้' ? 'ถอนเงินออม' : 'เงินออม';
-        
-        if (mode === 'single') {
-          const goal = document.getElementById('tx-goal-slot').value;
-          finalCategory = `บริหารเงินออม: ${action} [${goal}]`;
-          if (goal !== '📦 คลังออมทั่วไป') {
-            goalUpdates.push({ goalName: goal, delta: action === 'เบิกออกมาใช้' ? -amount : amount });
-          }
-        } else {
-          const ranges = document.querySelectorAll('.split-range');
-          for (let r of ranges) {
-            const pct = parseFloat(r.value);
-            if (pct > 0) {
-              const splitAmt = amount * (pct / 100);
-              const gName = r.dataset.goal;
-              await sendApi({
-                action: "add_transaction",
-                date: date,
-                type: finalType,
-                category: `บริหารเงินออม: ${action} [${gName}]`,
-                amount: splitAmt,
-                note: `${note} (แบ่ง ${pct.toFixed(0)}%)`.trim(),
-                wallet: finalWallet,
-                goalUpdates: [{ goalName: gName, delta: action === 'เบิกออกมาใช้' ? -splitAmt : splitAmt }]
-              });
-            }
-          }
-          await fetchAllData();
-          return;
-        }
-      } else {
-        const cat = document.getElementById('tx-cat').value;
-        const sub = document.getElementById('tx-subcat').value;
-        finalCategory = sub !== 'ทั่วไป' ? `${cat}: ${sub}` : cat;
-      }
-
-      await sendApi({
-        action: "add_transaction",
-        date: date,
-        type: finalType,
-        category: finalCategory,
-        amount: amount,
-        note: note,
-        wallet: finalWallet,
-        goalUpdates: goalUpdates
-      });
-      await fetchAllData();
-    }
-
-    async function handleAddGoal(e) {
-      e.preventDefault();
-      const name = document.getElementById('g-name').value.trim();
-      const target = cleanNum(document.getElementById('g-target').value);
-      const saved = cleanNum(document.getElementById('g-saved').value) || 0;
-      const pri = document.getElementById('g-priority').value;
-
-      if (!name || target <= 0) return;
-      const currentGoals = DB.goals ? DB.goals.slice(0) : [["ไอคอน", "ชื่อเป้าหมาย", "เป้าหมาย (บาท)", "สะสมแล้ว (บาท)", "ความสำคัญ"]];
-      currentGoals.push(["🎯", name, target, saved, pri]);
-
-      await sendApi({ action: "save_table", sheetName: "Goals", rows: currentGoals });
-      await fetchAllData();
-    }
-
-    async function handleAddDebt(e) {
-      e.preventDefault();
-      await sendApi({
-        action: "add_receivable",
-        who: document.getElementById('debt-who').value,
-        desc: document.getElementById('debt-desc').value,
-        amount: cleanNum(document.getElementById('debt-amt').value),
-        wallet: document.getElementById('debt-wallet').value,
-        date: getNowString()
-      });
-      await fetchAllData();
-    }
-
-    async function handlePayDebt() {
-      const select = document.getElementById('debt-pending-select');
-      if (select.selectedIndex === -1) return;
-      const rowIndex = parseInt(select.value);
-      const returnWallet = document.getElementById('debt-return-wallet').value;
-      const text = select.options[select.selectedIndex].text;
-      const who = text.split('-')[1].split('(')[0].trim();
-      const amtStr = text.split('฿')[1].replace(')', '');
-      const amt = cleanNum(amtStr);
-
-      await sendApi({
-        action: "pay_receivable",
-        rowIndex: rowIndex,
-        who: who,
-        amount: amt,
-        returnWallet: returnWallet,
-        date: getNowString()
-      });
-      await fetchAllData();
-    }
-
-    async function handlePayLoan() {
-      const loan = DB.loans[1];
-      const nextMonth = parseInt(loan[3]) + 1;
-      const emi = cleanNum(document.getElementById('loan-emi').innerText.replace('฿', ''));
-      await sendApi({
-        action: "pay_loan",
-        nextMonth: nextMonth,
-        totalMonths: parseInt(loan[2]),
-        paidMonth: getNowString().slice(0, 7),
-        emi: emi,
-        wallet: getWalletList()[0],
-        date: getNowString()
-      });
-      await fetchAllData();
-    }
-
-    async function saveCalibration() {
-      const inputs = document.querySelectorAll('.calib-input');
-      const adjustments = [];
-      inputs.forEach(inp => {
-        if (inp.value) {
-          const target = cleanNum(inp.value);
-          const curr = cleanNum(inp.dataset.curr);
-          const diff = target - curr;
-          if (Math.abs(diff) >= 0.01) {
-            adjustments.push({
-              date: getNowString(),
-              type: diff > 0 ? "⚖️ ปรับยอดเพิ่ม" : "⚖️ ปรับยอดลด",
-              amount: Math.abs(diff),
-              wallet: inp.dataset.wallet
-            });
-          }
-        }
-      });
-      if (adjustments.length > 0) {
-        await sendApi({ action: "calibrate_wallets", adjustments });
-        await fetchAllData();
-      }
-    }
-
-    async function sendApi(payload) {
-      showLoading(true);
-      try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify(payload)
-        });
-        await new Promise(r => setTimeout(r, 1200));
-      } catch (err) {
-        console.error("API Error:", err);
-      } finally {
-        showLoading(false);
-      }
-    }
-
-    function renderQuickAdds() {
-      const container = document.getElementById('quick-add-container');
-      container.innerHTML = '';
-      const list = (DB.quickAdds && DB.quickAdds.length > 1) ? DB.quickAdds.slice(1) : [
-        ["🍚 ข้าว ฿60", "รายจ่าย", "อาหาร/เครื่องดื่ม", 60],
-        ["☕ กาแฟ ฿50", "รายจ่าย", "อาหาร/เครื่องดื่ม", 50],
-        ["⛽ น้ำมัน ฿100", "รายจ่าย", "ค่าเดินทาง", 100],
-        ["🏪 7-11 ฿150", "รายจ่าย", "ของใช้ส่วนตัว", 150]
-      ];
-      list.forEach(q => {
-        const btn = document.createElement('button');
-        btn.className = "p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold shadow-sm hover:border-[#f9744b] hover:text-[#f9744b] transition-all text-slate-200";
-        btn.innerText = q[0];
-        btn.onclick = async () => {
-          await sendApi({
-            action: "add_transaction",
-            date: getNowString(),
-            type: q[1],
-            category: q[2],
-            amount: cleanNum(q[3]),
-            note: "บันทึกด่วน (" + q[0] + ")",
-            wallet: getWalletList()[0]
-          });
-          await fetchAllData();
-        };
-        container.appendChild(btn);
-      });
-    }
-
-    function getNowString() {
-      const now = new Date();
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    }
-    function resetDateTime() {
-      const now = new Date();
-      document.getElementById('tx-date').value = now.toISOString().split('T')[0];
-      const pad = (n) => String(n).padStart(2, '0');
-      document.getElementById('tx-time').value = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    }
-    function showLoading(show) {
-      const spinner = document.getElementById('loading-spinner');
-      if (spinner) spinner.classList.toggle('hidden', !show);
-    }
-
-    window.addEventListener('DOMContentLoaded', fetchAllData);
+    });
   </script>
 </body>
 </html>
