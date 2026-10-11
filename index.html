@@ -406,17 +406,24 @@
       return list.length > 0 ? list : ["🏦 กรุงไทย", "📱 TrueMoney Wallet", "🌸 ออมสิน"];
     }
 
-    function getCategoriesMap() {
+   function getCategoriesMap() {
       const map = { 'รายจ่าย': {}, 'รายรับ': {} };
       if (!DB.categories) return map;
+      
       DB.categories.slice(1).forEach(r => {
         const rawType = String(r[0] || '').trim();
-        const key = rawType.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
         const main = String(r[1] || '').trim();
         const sub = String(r[2] || '').trim();
         
+        // ข้ามแถวที่ไม่มีข้อมูล (ดักจับเซลล์ว่างจาก Google Sheets)
+        if (!rawType || !main) return; 
+        
+        const key = rawType.includes('รับ') ? 'รายรับ' : 'รายจ่าย';
+        
         if (!map[key][main]) map[key][main] = [];
-        if (sub && !map[key][main].includes(sub)) map[key][main].push(sub);
+        if (sub && sub !== "" && !map[key][main].includes(sub)) {
+          map[key][main].push(sub);
+        }
       });
       return map;
     }
