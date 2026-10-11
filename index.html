@@ -536,19 +536,31 @@
     }
 
     // 5. Dashboard Calculations
-    function renderDashboard() {
+  function renderDashboard() {
       const txRows = (DB.transactions && DB.transactions.length > 1) ? DB.transactions.slice(1) : [];
       const selectedCycle = document.getElementById('dash-cycle-select').value;
 
-      let filteredTx = txRows;
+      // 1. แยกข้อมูลเป็น 2 ชุด (แบบสะสมทั้งหมด vs แบบเฉพาะรอบบัญชีนี้)
+      let cumulativeTx = txRows; // สำหรับคำนวณเงินสะสมทุกกระเป๋า
+      let filteredTx = txRows;   // สำหรับแสดงกราฟ/รายรับรายจ่ายเฉพาะเดือนนี้
+      let activeCarry = 0;       // ยอดยกมาตั้งต้นสำหรับกระเป๋าหลัก
+
       if (selectedCycle !== "ALL" && DB.cycles) {
         const cycle = DB.cycles.slice(1).find(c => c[0] === selectedCycle);
         if (cycle) {
+          activeCarry = parseFloat(cycle[4]) || 0; // ดึงยอดยกมาจากคอลัมน์ E (Index 4)
           const start = parseSafeDate(cycle[1]);
           const end = cycle[2] ? parseSafeDate(cycle[2]) : new Date(8640000000000000);
+          
           filteredTx = txRows.filter(r => {
             const d = parseSafeDate(r[0]);
             return d >= start && d <= end;
+          });
+          
+          // ตัดข้อมูลสะสมไม่ให้อนาคตมาปน (นับตั้งแต่อดีตจนถึงสิ้นรอบนี้)
+          cumulativeTx = txRows.filter(r => {
+             const d = parseSafeDate(r[0]);
+             return d <= end;
           });
         }
       }
@@ -557,24 +569,67 @@
       const balances = {};
       wallets.forEach(w => balances[w] = 0);
 
-      txRows.forEach(r => {
+      // หาคลังเงินออมรวม (Total Savings) ไว้คำนวณให้ออมสิน
+      let totalSavings = 0;
+      cumulativeTx.forEach(r => {
+         const type = String(r[1]).trim();
+         const amt = cleanNum(r[3]);
+         if (type === "เงินออม") totalSavings += amt;
+         if (type.includes("ถอนเงินออม")) totalSavings -= amt;
+      });
+
+      // 2. คำนวณเงินคงเหลือกกระเป๋าจาก All Time (เหมือน Python เดิม)
+      cumulativeTx.forEach(r => {
         const type = String(r[1]).trim();
         const cat = String(r[2]).trim();
         const amt = cleanNum(r[3]);
         const w = String(r[5]).trim();
 
         if (type.includes("โอนย้าย")) {
+          // หากเป็นการโอนไปทรูมันนี่หรือที่อื่น ให้จัดการเพิ่ม/ลด
           if (balances[w] !== undefined) balances[w] -= amt;
           wallets.forEach(toW => {
-            if (cat.includes(`เข้า ${toW}`)) balances[toW] = (balances[toW] || 0) + amt;
+             // เช็คว่าใน Note หรือ Cat มีชื่อกระเป๋าปลายทางหรือไม่
+            if (cat.toLowerCase().includes(toW.toLowerCase())) balances[toW] = (balances[toW] || 0) + amt;
           });
-        } else if (type.includes("รายรับ") || type.includes("รับคืน") || type.includes("ปรับยอดเพิ่ม") || type.includes("ถอนเงินออม")) {
+        } else if (
+          type.includes("รายรับ") || 
+          type.includes("ถอนเงินออม") || 
+          type.includes("กู้เงินออม") || 
+          type.includes("รับคืนเงินทดจ่าย") || 
+          type.includes("ปรับยอดเพิ่ม")
+        ) {
           if (balances[w] !== undefined) balances[w] += amt;
-        } else if (type.includes("รายจ่าย") || type.includes("เงินลงทุน") || type.includes("เงินออม") || type.includes("ปรับยอดลด") || type.includes("เงินทดจ่าย")) {
+        } else if (
+          type.includes("รายจ่าย") || 
+          type.includes("เงินลงทุน") || 
+          (type.includes("เงินออม") && !type.includes("ถอน") && !type.includes("กู้")) || 
+          type.includes("คืนเงินกู้ออม") || 
+          (type.includes("เงินทดจ่าย") && !type.includes("รับคืน")) || 
+          type.includes("ปรับยอดลด")
+        ) {
           if (balances[w] !== undefined) balances[w] -= amt;
         }
       });
 
+      // 3. ปรับสมการพิเศษ (ออมสิน + ยอดยกมา)
+      const primaryWallet = wallets[0] || "🏦 กรุงไทย"; 
+      balances[primaryWallet] += activeCarry; // บวกยอดยกมาจากชีต Cycles เข้ากระเป๋าหลัก
+
+      // ออมสิน = Total Savings + ปรับยอดเข้า - ปรับยอดออก
+      wallets.forEach(w => {
+         if (w.includes("ออมสิน")) {
+            let adjIn = 0, adjOut = 0;
+            cumulativeTx.filter(r => r[5] === w).forEach(r => {
+               const t = String(r[1]);
+               if (t.includes("ปรับยอดเพิ่ม")) adjIn += cleanNum(r[3]);
+               if (t.includes("ปรับยอดลด")) adjOut += cleanNum(r[3]);
+            });
+            balances[w] = totalSavings + adjIn - adjOut;
+         }
+      });
+
+      // 4. แสดงผลกระเป๋า (UI)
       const wCardContainer = document.getElementById('dash-wallets');
       const calibContainer = document.getElementById('calibrate-inputs');
       wCardContainer.innerHTML = '';
@@ -585,35 +640,40 @@
         const bal = balances[w] || 0;
         netWealth += bal;
         const color = PALETTE[i % PALETTE.length];
-        wCardContainer.innerHTML += `
-          <div class="flex-1 min-w-[150px] p-3 rounded-xl border border-slate-200 bg-white" style="border-left: 4px solid ${color}">
-            <span class="text-xs text-slate-500 font-medium">${w}</span>
-            <div class="text-lg font-bold" style="color:${color}">฿${bal.toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-          </div>
-        `;
-        calibContainer.innerHTML += `
-          <div>
-            <label class="block text-[10px] text-slate-500">${w}</label>
-            <input type="number" step="0.01" data-wallet="${w}" data-curr="${bal}" placeholder="฿${bal.toFixed(0)}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs calib-input outline-none">
-          </div>
-        `;
+        
+        // กรองการสร้าง UI ไม่ให้กระเป๋าเปล่าหลงมาสร้างบั๊กช่องว่าง
+        if (w && w !== "") {
+           wCardContainer.innerHTML += `
+             <div class="flex-1 min-w-[150px] p-3 rounded-xl border border-slate-200 bg-white" style="border-left: 4px solid ${color}">
+               <span class="text-xs text-slate-500 font-medium">${w}</span>
+               <div class="text-lg font-bold" style="color:${color}">฿${bal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+             </div>
+           `;
+           calibContainer.innerHTML += `
+             <div>
+               <label class="block text-[10px] text-slate-500">${w}</label>
+               <input type="number" step="0.01" data-wallet="${w}" data-curr="${bal}" placeholder="฿${bal.toFixed(0)}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs calib-input outline-none">
+             </div>
+           `;
+        }
       });
 
-      let inc = 0, exp = 0, sav = 0, inv = 0;
+      // 5. คำนวณสรุปเฉพาะเดือนนี้ (จาก filteredTx)
+      let inc = 0, exp = 0, savFlow = 0, inv = 0;
       filteredTx.forEach(r => {
         const type = String(r[1]).trim();
         const amt = cleanNum(r[3]);
         if (type.includes("รายรับ") && !type.includes("รับคืน")) inc += amt;
-        if (type.includes("รายจ่าย")) exp += amt;
-        if (type === "เงินออม") sav += amt;
-        if (type.includes("ถอนเงินออม")) sav -= amt;
+        if (type.includes("รายจ่าย") && !type.includes("ปรับยอด") && !String(r[2]).includes("ฝากออม")) exp += amt;
+        if (type === "เงินออม") savFlow += amt;
+        if (type.includes("ถอนเงินออม")) savFlow -= amt;
         if (type.includes("ลงทุน")) inv += amt;
       });
 
       document.getElementById('m-net').innerText = `฿${netWealth.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
       document.getElementById('m-inc').innerText = `฿${inc.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
       document.getElementById('m-exp').innerText = `฿${exp.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-      document.getElementById('m-sav').innerText = `฿${sav.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+      document.getElementById('m-sav').innerText = `฿${savFlow.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
       document.getElementById('m-inv').innerText = `฿${inv.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
 
       renderBudgetTracker(filteredTx);
