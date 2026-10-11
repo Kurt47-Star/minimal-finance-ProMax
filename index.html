@@ -529,7 +529,7 @@
       txRows.forEach(r => {
         const type = String(r[1]).trim();
         const cat = String(r[2]).trim();
-        const amt = parseFloat(r[3]) || 0;
+        const amt = parseFloat(String(r[3] || '0').replace(/,/g, '')) || 0;
         const w = String(r[5]).trim();
 
         if (type.includes("โอนย้าย")) {
