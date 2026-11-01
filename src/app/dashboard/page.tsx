@@ -1,5 +1,9 @@
 "use client";
-
+interface TransactionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void; // <-- เติมบรรทัดนี้เพิ่มเข้าไป
+}
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
