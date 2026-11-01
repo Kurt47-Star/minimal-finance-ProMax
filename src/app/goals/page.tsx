@@ -55,8 +55,8 @@ export default function GoalsPage() {
     }
 
     // คำนวณคลังเงินออมจริงจากประวัติธุรกรรม
-    const { totalSavNow: realSavings } = calculateSavingsMetrics(tRes.data || []);
-    setTotalSavNow(realSavings);
+    const savMetrics = calculateSavingsMetrics(tRes.data || []);
+    setTotalSavNow(savMetrics.totalSavNow);
 
     // ยอดจัดสรรแล้ว
     const allocated = loadedGoals.reduce(
@@ -64,7 +64,7 @@ export default function GoalsPage() {
       0
     );
     setTotalAllocated(allocated);
-    setRemainingUnallocated(realSavings - allocated);
+    setRemainingUnallocated(savMetrics.totalSavNow - allocated);
   };
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function GoalsPage() {
       .update({ current_amount: newTotal, saved_amount: newTotal })
       .eq("id", depositGoal.id);
 
-    // 2. บันทึก Transaction เพื่อหักเงินจากกระเป๋าที่เลือกและบันทึกเข้าคลังเงินออม
+    // 2. บันทึก Transaction เพื่อหักเงินจากกระเป๋าที่เลือก
     await supabase.from("transactions").insert({
       type: "เงินออม",
       category: `บริหารเงินออม: ฝากเงินเพิ่ม [${depositGoal.name}]`,
@@ -179,20 +179,11 @@ export default function GoalsPage() {
     return scoreA - scoreB;
   });
 
-  // ตัวเลือกสไตล์ Badge สำหรับแต่ละ Priority
   const getPriorityBadge = (p: string) => {
-    if (p?.includes("ด่วนที่สุด")) {
-      return "bg-rose-500/15 text-rose-500 border-rose-500/30";
-    }
-    if (p?.includes("สูง")) {
-      return "bg-[#f9744b]/15 text-[#f9744b] border-[#f9744b]/30";
-    }
-    if (p?.includes("ปานกลาง")) {
-      return "bg-amber-500/15 text-amber-500 border-amber-500/30";
-    }
-    if (p?.includes("ต่ำ")) {
-      return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
-    }
+    if (p?.includes("ด่วนที่สุด")) return "bg-rose-500/15 text-rose-500 border-rose-500/30";
+    if (p?.includes("สูง")) return "bg-[#f9744b]/15 text-[#f9744b] border-[#f9744b]/30";
+    if (p?.includes("ปานกลาง")) return "bg-amber-500/15 text-amber-500 border-amber-500/30";
+    if (p?.includes("ต่ำ")) return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
     return "bg-blue-500/15 text-blue-500 border-blue-500/30";
   };
 
@@ -225,7 +216,7 @@ export default function GoalsPage() {
           </button>
         </header>
 
-        {/* 3 การ์ดคำนวณคลังเงินออมจริง (Savings Metrics) */}
+        {/* 3 การ์ดคำนวณคลังเงินออมจริง */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
@@ -290,11 +281,9 @@ export default function GoalsPage() {
                           {g.icon || "🎯"}
                         </div>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-base text-slate-800 dark:text-white">
-                              {g.name}
-                            </h3>
-                          </div>
+                          <h3 className="font-bold text-base text-slate-800 dark:text-white">
+                            {g.name}
+                          </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPriorityBadge(
@@ -333,7 +322,6 @@ export default function GoalsPage() {
                         </span>
                       </div>
 
-                      {/* หลอดเปอร์เซ็นต์ */}
                       <div className="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
@@ -347,7 +335,6 @@ export default function GoalsPage() {
                     </div>
                   </div>
 
-                  {/* ปุ่มฝากเงินเพิ่ม */}
                   <div className="pt-3 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
                     <span className="text-[11px] text-slate-400">
                       ขาดอีก: ฿{formatMoney(Math.max(0, target - current))}
@@ -471,7 +458,7 @@ export default function GoalsPage() {
         </div>
       )}
 
-      {/* Modal ฝากเงินด่วนเข้าเป้าหมาย (ผูกหักบัญชีจริง) */}
+      {/* Modal ฝากเงินด่วนเข้าเป้าหมาย */}
       {depositGoal && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-150">
